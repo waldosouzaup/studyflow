@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 /src/generated/prisma
+
+# Build and generated files
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+dist
