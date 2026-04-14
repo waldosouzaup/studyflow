@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(gen_random_uuid())
+  email        String    @unique
+  name         String
+  avatarUrl    String?
+  googleId     String    @unique
+  streakCount  Int       @default(0)
+  streakLastDate Date?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  subjects      Subject[]
+  sessions     StudySession[]
+  plans        Plan[]
+  reviews      Review[]
+  goals        Goal[]
+}
+
+model Subject {
+  id                String    @id @default(gen_random_uuid())
+  userId            String
+  name              String
+  color             String
+  weeklyGoalHours   Decimal?  @db.Decimal(5, 2)
+  monthlyGoalHours  Decimal?  @db.Decimal(5, 2)
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions  StudySession[]
+  plans     Plan[]
+  reviews   Review[]
+  goals     Goal[]
+
+  @@unique([userId, name])
+  @@index([userId, deletedAt])
+}
+
+model StudySession {
+  id              String    @id @default(gen_random_uuid())
+  userId          String
+  subjectId       String
+  date            DateTime  @db.Date
+  startedAt       DateTime
+  finishedAt      DateTime?
+  pausedAt        DateTime?
+  durationMinutes Int
+  topic           String?
+  notes           String?
+  difficulty     Int?
+  focus           Int?
+  sessionType     String    @default("free")
+  isOfflineSync   Boolean  @default(false)
+  createdAt       DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  reviews  Review[]
+
+  @@index([userId, date])
+  @@index([userId, subjectId])
+}
+
+model Plan {
+  id              String    @id @default(gen_random_uuid())
+  userId          String
+  subjectId       String?
+  plannedDate     DateTime  @db.Date
+  task            String
+  estimatedMinutes Int?
+  priority       String    @default("medium")
+  status         String    @default("pending")
+  isOverdue      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, plannedDate])
+}
+
+model Review {
+  id          String    @id @default(gen_random_uuid())
+  userId      String
+  subjectId   String
+  sessionId  String?
+  topic      String
+  reviewDate DateTime  @db.Date
+  status     String    @default("pending")
+  createdAt  DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  session StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, reviewDate])
+}
+
+model Goal {
+  id              String    @id @default(gen_random_uuid())
+  userId          String
+  subjectId      String?
+  type            String
+  targetMinutes   Int
+  periodStart    DateTime  @db.Date
+  periodEnd      DateTime  @db.Date
+  isActive       Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, periodStart, periodEnd])
+}
