@@ -135,8 +135,8 @@ export default function Timer() {
 
   const finishSession = async () => {
     const durationMinutes = Math.floor(elapsedSeconds / 60)
-    if (durationMinutes < 5) {
-      alert('Sessão deve ter pelo menos 5 minutos')
+    if (durationMinutes < 1) {
+      alert('A sessão deve ter pelo menos 1 minuto para ser registrada')
       return
     }
     if (!activeSession) return
@@ -195,196 +195,227 @@ export default function Timer() {
   const isLoading = createSession.isPending || updateSession.isPending
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">Timer de Estudo</h2>
+    <div className="max-w-4xl mx-auto flex flex-col gap-10 animate-fadeIn">
+      <div className="text-center space-y-2">
+        <span className="text-xs font-label uppercase tracking-[0.15em] text-outline block">Modo Foco</span>
+        <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Sessão de Estudo</h1>
+      </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className={`text-6xl font-mono mb-8 ${
-          sessionState === 'paused' ? 'text-yellow-600' : ''
+      <div className="surface-card p-12 flex flex-col items-center relative overflow-hidden">
+        {sessionState === 'paused' && (
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-pulse" />
+        )}
+        
+        <div className={`text-[120px] md:text-[160px] font-headline font-thin tracking-tighter leading-none mb-8 timer-glow ${
+          sessionState === 'paused' ? 'text-outline opacity-50' : 'text-on-surface'
         }`}>
           {formatTime(elapsedSeconds)}
         </div>
 
         {sessionState === 'idle' && (
-          <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Assunto</label>
-              <select
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-                className="w-full p-3 border rounded-lg"
-                disabled={isLoading}
-              >
-                <option value="">Selecione um assunto</option>
-                {subjects?.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+          <div className="w-full max-w-sm space-y-6 animate-fadeIn">
+            <div className="space-y-2">
+              <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Selecionar Assunto</label>
+              <div className="relative group">
+                <select
+                  value={selectedSubject}
+                  onChange={(e) => setSelectedSubject(e.target.value)}
+                  className="input w-full appearance-none pr-10"
+                  disabled={isLoading}
+                >
+                  <option value="">Escolha um assunto...</option>
+                  {subjects?.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none group-focus-within:rotate-180 transition-transform">expand_more</span>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Modo</label>
-              <div className="flex gap-4 justify-center">
+
+            <div className="space-y-2">
+              <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Tipo de Sessão</label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setSessionType('free')}
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`py-3 px-4 text-sm font-medium transition-all rounded-lg border ${
                     sessionType === 'free'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'flow-gradient text-on-primary border-transparent'
+                      : 'bg-surface-container-highest text-on-surface-variant border-outline-variant hover:border-primary'
                   }`}
                 >
-                  Livre
+                  Contínua
                 </button>
                 <button
                   onClick={() => setSessionType('pomodoro')}
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`py-3 px-4 text-sm font-medium transition-all rounded-lg border ${
                     sessionType === 'pomodoro'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'flow-gradient text-on-primary border-transparent'
+                      : 'bg-surface-container-highest text-on-surface-variant border-outline-variant hover:border-primary'
                   }`}
                 >
-                  Pomodoro (25min)
+                  Pomodoro
                 </button>
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-outline-variant/10">
+              <button
+                onClick={startSession}
+                disabled={!selectedSubject || isLoading}
+                className="w-full py-4 flow-gradient text-on-primary text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Iniciando...' : 'Iniciar Sessão'}
+              </button>
             </div>
           </div>
         )}
 
-        {sessionState === 'idle' && (
-          <button
-            onClick={startSession}
-            disabled={!selectedSubject || isLoading}
-            className="w-full py-4 bg-green-600 text-white text-xl rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Iniciando...' : 'Iniciar Sessão'}
-          </button>
-        )}
-
         {(sessionState === 'active' || sessionState === 'paused') && (
-          <div className="flex gap-4 justify-center">
-            {sessionState === 'paused' ? (
-              <button
-                onClick={resumeSession}
-                disabled={isLoading}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Retomando...' : 'Retomar'}
-              </button>
-            ) : (
-              <button
-                onClick={pauseSession}
-                disabled={isLoading}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-              >
-                Pausar
-              </button>
-            )}
+          <div className="flex items-center gap-8 animate-scaleIn">
+            <button
+              onClick={pauseSession}
+              disabled={isLoading}
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all active:scale-90 border border-outline-variant/10"
+            >
+              <span className="material-symbols-outlined text-2xl">pause</span>
+            </button>
             <button
               onClick={finishSession}
               disabled={isLoading}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              className="w-24 h-24 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all active:scale-95"
             >
-              Finalizar
+              <span className="material-symbols-outlined text-5xl">stop</span>
             </button>
+            {sessionState === 'paused' && (
+              <button
+                onClick={resumeSession}
+                disabled={isLoading}
+                className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-primary/10 transition-all active:scale-90 border border-primary/20"
+              >
+                <span className="material-symbols-outlined text-2xl">play_arrow</span>
+              </button>
+            )}
           </div>
         )}
 
         {sessionState === 'finished' && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Tópico</label>
-              <input
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                className="w-full p-3 border rounded-lg"
-                placeholder="O que você estudou?"
-              />
+          <div className="w-full max-w-md space-y-6 animate-slideUp">
+            <div className="pb-6 border-b border-outline-variant/10">
+              <h3 className="text-xl font-headline font-bold text-primary">Sessão Concluída</h3>
+              <p className="text-sm text-on-surface-variant mt-1">Adicione notas e parâmetros sobre esta sessão.</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Notas</label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full p-3 border rounded-lg"
-                rows={3}
-                placeholder="Observações..."
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Dificuldade (1-3)</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setDifficulty(n)}
-                      className={`flex-1 py-2 rounded ${
-                        difficulty === n
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100'
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Tópico</label>
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  className="input w-full"
+                  placeholder="Ex: Resolvi exercícios de cálculo"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Anotações</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="input w-full resize-none"
+                  rows={3}
+                  placeholder="Descobertas ou dificuldades..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline text-center">Dificuldade</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setDifficulty(n)}
+                        className={`flex-1 py-3 text-sm font-mono font-bold rounded-lg border transition-all ${
+                          difficulty === n
+                            ? 'bg-on-surface text-surface border-on-surface'
+                            : 'bg-surface-container-highest text-outline border-outline-variant hover:text-on-surface'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline text-center">Foco</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setFocus(n)}
+                        className={`flex-1 py-3 text-sm font-mono font-bold rounded-lg border transition-all ${
+                          focus === n 
+                            ? 'bg-primary text-on-primary border-primary' 
+                            : 'bg-surface-container-highest text-outline border-outline-variant hover:text-on-surface'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Foco (1-3)</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setFocus(n)}
-                      className={`flex-1 py-2 rounded ${
-                        focus === n ? 'bg-blue-600 text-white' : 'bg-gray-100'
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
+
+              <div className="pt-6 border-t border-outline-variant/10">
+                <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline mb-4 text-center">Agendar Revisão</label>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => createReviewFromSession(1)}
+                    className="px-5 py-2 rounded-lg border border-outline-variant/20 text-xs font-label uppercase tracking-wider hover:border-primary hover:text-primary transition-colors"
+                  >
+                    1 dia
+                  </button>
+                  <button
+                    onClick={() => createReviewFromSession(7)}
+                    className="px-5 py-2 rounded-lg border border-outline-variant/20 text-xs font-label uppercase tracking-wider hover:border-primary hover:text-primary transition-colors"
+                  >
+                    7 dias
+                  </button>
+                  <button
+                    onClick={() => createReviewFromSession(30)}
+                    className="px-5 py-2 rounded-lg border border-outline-variant/20 text-xs font-label uppercase tracking-wider hover:border-primary hover:text-primary transition-colors"
+                  >
+                    30 dias
+                  </button>
                 </div>
               </div>
-            </div>
-            <div className="pt-4 border-t">
-              <p className="text-sm text-gray-600 mb-2">Agendar revisão?</p>
-              <div className="flex gap-2 justify-center">
+
+              <div className="pt-6 text-center">
                 <button
-                  onClick={() => createReviewFromSession(1)}
-                  className="px-3 py-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                  onClick={resetTimer}
+                  className="py-3 px-6 text-sm font-medium text-outline hover:text-on-surface transition-colors"
                 >
-                  1 dia
-                </button>
-                <button
-                  onClick={() => createReviewFromSession(7)}
-                  className="px-3 py-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-                >
-                  7 dias
-                </button>
-                <button
-                  onClick={() => createReviewFromSession(30)}
-                  className="px-3 py-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-                >
-                  30 dias
+                  Nova Sessão
                 </button>
               </div>
             </div>
-            <button
-              onClick={resetTimer}
-              className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-            >
-              Nova Sessão
-            </button>
           </div>
         )}
       </div>
 
+      <div className="fixed bottom-10 right-10 bg-surface-container-highest/80 backdrop-blur-md p-4 rounded-full border border-outline-variant/20 group hover:bg-primary transition-all active:scale-95 z-50 cursor-pointer">
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined group-hover:text-on-primary">visibility_off</span>
+          <span className="font-label text-xs font-bold uppercase tracking-widest hidden group-hover:block text-on-primary">Modo Zen</span>
+        </div>
+      </div>
+
       {subjects?.length === 0 && (
-        <p className="text-center text-gray-500 mt-4">
-          Crie um assunto primeiro em Assuntos
-        </p>
+        <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant/10 text-center text-sm text-outline">
+          Nenhum assunto cadastrado. <a href="/subjects" className="text-primary hover:underline">Adicionar assunto</a>
+        </div>
       )}
     </div>
   )

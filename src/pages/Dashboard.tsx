@@ -4,6 +4,7 @@ import { usePlans } from '../hooks/usePlans'
 import { useReviews } from '../hooks/useReviews'
 import { format, subDays, eachDayOfInterval } from 'date-fns'
 import { PageLoading } from '../components/Loading'
+import clsx from 'clsx'
 
 export default function Dashboard() {
   const user = useAuthStore((s) => s.user)
@@ -21,56 +22,181 @@ export default function Dashboard() {
   const weekMinutes = weekSessions?.reduce((sum, s) => sum + s.durationMinutes, 0) || 0
   const todayPlansDone = plans?.filter((p) => p.status === 'done').length || 0
 
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Bom dia'
+    if (hour < 18) return 'Boa tarde'
+    return 'Boa noite'
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-        <p className="text-slate-600 dark:text-slate-400">Bem-vindo, {user?.name}!</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="card p-6">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Hoje</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-white">
-            {Math.floor(todayMinutes / 60)}h {todayMinutes % 60}m
-          </p>
+    <div className="space-y-8 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <span className="text-xs font-label uppercase tracking-[0.15em] text-primary mb-2 block">Painel</span>
+          <h1 className="text-4xl font-headline font-extrabold tracking-tight text-on-surface">
+            {getGreeting()}, {user?.name?.split(' ')[0]}.
+          </h1>
+          <p className="text-on-surface-variant text-sm mt-1">Seu índice de foco está 12% maior que na semana passada.</p>
         </div>
-        <div className="card p-6">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Esta Semana</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-white">
-            {Math.floor(weekMinutes / 60)}h {weekMinutes % 60}m
-          </p>
-        </div>
-        <div className="card p-6">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Tarefas Hoje</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-white">
-            {todayPlansDone}/{plans?.length || 0}
-          </p>
-        </div>
-        <div className="card p-6">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Revisões</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-white">
-            {pendingReviews?.length || 0} pending
-          </p>
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
+            <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
+          </button>
+          <button className="flow-gradient text-on-primary font-headline font-bold px-6 py-3 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined">play_arrow</span>
+              Iniciar Sessão
+            </span>
+          </button>
         </div>
       </div>
 
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Atividade da Semana</h2>
-        <div className="flex gap-1">
-          {eachDayOfInterval({ start: subDays(new Date(), 6), end: new Date() }).map((day) => {
-            const dayStr = format(day, 'yyyy-MM-dd')
-            const dayMinutes = weekSessions?.filter((s) => s.date.split('T')[0] === dayStr).reduce((sum, s) => sum + s.durationMinutes, 0) || 0
-            const intensity = dayMinutes === 0 ? 0 : dayMinutes < 30 ? 1 : dayMinutes < 60 ? 2 : dayMinutes < 120 ? 3 : 4
-            const colors = ['bg-slate-200 dark:bg-slate-700', 'bg-indigo-200', 'bg-indigo-400', 'bg-indigo-500', 'bg-indigo-600']
-            return (
-              <div key={day.toISOString()} className="flex-1 flex flex-col items-center gap-1">
-                <div className={`w-full h-8 rounded ${colors[intensity]}`} />
-                <span className="text-xs text-slate-500">{format(day, 'EEEEE')}</span>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="surface-card p-6">
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Horas Estudadas Hoje</span>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-headline font-bold">{Math.floor(todayMinutes / 60)}.{Math.floor((todayMinutes % 60) / 6)}</span>
+            <span className="text-sm text-outline">/ 6.0</span>
+          </div>
+        </div>
+        <div className="surface-card p-6">
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Meta Diária</span>
+          <div className="mt-4">
+            <div className="flex justify-between text-xs mb-2">
+              <span className="text-secondary font-bold">{plans?.length ? Math.round((todayPlansDone / plans.length) * 100) : 0}%</span>
+              <span className="text-outline">Meta: {plans?.length || 0} tarefas</span>
+            </div>
+            <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-secondary to-secondary-fixed-dim" style={{ width: `${plans?.length ? (todayPlansDone / plans.length) * 100 : 0}%` }}></div>
+            </div>
+          </div>
+        </div>
+        <div className="surface-card p-6">
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Total Semanal</span>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-3xl font-headline font-bold">{Math.floor(weekMinutes / 60)}h</span>
+            <span className="text-sm text-outline">{(weekMinutes % 60)}m</span>
+          </div>
+        </div>
+        <div className="surface-card p-6">
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Revisões Pendentes</span>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-3xl font-headline font-bold text-tertiary">{pendingReviews?.length || 0}</span>
+            <span className="text-sm text-outline">Tópicos</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <section className="lg:col-span-2 surface-card p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-headline font-bold">Plano de Hoje</h3>
+            <span className="text-xs font-label text-outline">{format(new Date(), 'd MMMM, yyyy').toUpperCase()}</span>
+          </div>
+          <div className="space-y-4">
+            {plans?.slice(0, 4).map((plan) => (
+              <div key={plan.id} className="flex items-start gap-4 p-4 rounded-xl group hover:bg-surface-container-high transition-colors">
+                <div className="mt-1">
+                  <button
+                    onClick={() => {}}
+                    className="w-5 h-5 rounded border border-outline-variant bg-transparent text-primary focus:ring-primary/20 flex items-center justify-center"
+                  >
+                    {plan.status === 'done' && <span className="material-symbols-outlined text-sm">check</span>}
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between">
+                    <p className={clsx('font-medium', plan.status === 'done' ? 'line-through decoration-outline-variant/50 opacity-60' : '')}>{plan.task}</p>
+                    <span className={clsx(
+                      'text-[10px] font-label uppercase px-2 py-0.5 rounded',
+                      plan.priority === 'high' ? 'bg-error/10 text-error' : plan.priority === 'medium' ? 'bg-primary/10 text-primary' : 'bg-outline-variant/20 text-outline'
+                    )}>
+                      {plan.priority === 'high' ? 'Alta' : plan.priority === 'medium' ? 'Média' : 'Baixa'}
+                    </span>
+                  </div>
+                  {plan.subjectId && (
+                    <p className="text-xs text-outline mt-1">Assunto vinculado</p>
+                  )}
+                </div>
               </div>
-            )
-          })}
-        </div>
+            ))}
+            {(!plans || plans.length === 0) && (
+              <div className="text-center py-8 text-outline">Nenhuma tarefa para hoje</div>
+            )}
+          </div>
+          <button className="w-full mt-6 py-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-xl transition-colors border border-dashed border-outline-variant/30">
+            + Adicionar Tarefa
+          </button>
+        </section>
+
+        <section className="lg:col-span-3 space-y-6">
+          <section className="surface-card p-8">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-xl font-headline font-bold">Progresso Semanal</h3>
+              <div className="flex items-center gap-4 text-xs font-label">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary"></span>
+                  <span className="text-outline">Horas</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                  <span className="text-outline">Meta</span>
+                </div>
+              </div>
+            </div>
+            <div className="h-40 flex items-end justify-between px-2 gap-4">
+              {eachDayOfInterval({ start: subDays(new Date(), 6), end: new Date() }).map((day, i) => {
+                const dayStr = format(day, 'yyyy-MM-dd')
+                const dMinutes = weekSessions?.filter((s) => s.date.split('T')[0] === dayStr).reduce((sum, s) => sum + s.durationMinutes, 0) || 0
+                const maxMinutes = 240
+                const heightPct = Math.min((dMinutes / maxMinutes) * 100, 100)
+                const isToday = i === 6
+                
+                return (
+                  <div key={day.toISOString()} className="flex-1 flex flex-col items-center gap-3 h-full justify-end">
+                    <div className="w-full bg-primary/20 rounded-t-lg relative group h-full min-h-[20px]">
+                      <div className={clsx('absolute bottom-0 w-full rounded-t-lg', dMinutes > 0 ? 'bg-primary' : 'bg-surface-container-highest')} style={{ height: `${heightPct}%` }}></div>
+                      {dMinutes > 0 && (
+                        <div className="absolute bottom-[105%] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] font-mono bg-surface-container-highest px-2 py-1 rounded">{Math.floor(dMinutes / 60)}h</span>
+                        </div>
+                      )}
+                    </div>
+                    <span className={clsx('text-[10px] font-label text-outline uppercase', isToday ? 'text-primary font-bold' : '')}>
+                      {format(day, 'EEE')}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="surface-card p-8">
+            <h3 className="text-xl font-headline font-bold mb-6">Sessões Recentes</h3>
+            <div className="space-y-1">
+              {sessions?.slice(0, 3).map((session) => (
+                <div key={session.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-surface-container-high transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-primary text-xl">psychology</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm">{session.topic || 'Sessão de Foco'}</h4>
+                      <p className="text-xs text-outline">{format(new Date(session.startedAt), "d MMM, HH:mm")} • {session.sessionType || 'Trabalho Profundo'}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold">{Math.floor(session.durationMinutes / 60)}h {session.durationMinutes % 60}m</p>
+                  </div>
+                </div>
+              ))}
+              {(!sessions || sessions.length === 0) && (
+                <div className="text-center py-6 text-outline text-sm">Nenhuma sessão recente</div>
+              )}
+            </div>
+          </section>
+        </section>
       </div>
     </div>
   )

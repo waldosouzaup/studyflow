@@ -4,8 +4,8 @@ import { PageLoading, ErrorMessage } from '../components/Loading'
 import type { Subject } from '../types/database'
 
 const COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#08410c',
+  '#ADC7FF', '#E9C349', '#FFB695', '#8B90A0', '#4A8EFF',
+  '#C0A030', '#E08060', '#353534', '#2A2A2A', '#1C1B1B',
 ]
 
 export default function Subjects() {
@@ -26,7 +26,7 @@ export default function Subjects() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (formData.name.length < 3 || formData.name.length > 60) {
-      alert('Nome deve ter entre 3 e 60 caracteres')
+      alert('O nome deve ter entre 3 e 60 caracteres.')
       return
     }
 
@@ -48,7 +48,7 @@ export default function Subjects() {
       setEditingSubject(null)
       setFormData({ name: '', color: COLORS[0], weeklyGoalHours: '', monthlyGoalHours: '' })
     } catch (err) {
-      alert('Erro ao salvar assunto')
+      alert('Erro ao salvar assunto.')
     }
   }
 
@@ -64,102 +64,126 @@ export default function Subjects() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este assunto?')) {
+    if (confirm('Confirmar exclusão?')) {
       await deleteSubject.mutateAsync(id)
     }
   }
 
   if (isLoading) return <PageLoading />
-  if (error) return <ErrorMessage message="Erro ao carregar assuntos" />
+  if (error) return <ErrorMessage message="Falha ao carregar assuntos." />
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Assuntos</h2>
-        <button
-          onClick={() => {
-            setShowForm(true)
-            setEditingSubject(null)
-            setFormData({ name: '', color: COLORS[0], weeklyGoalHours: '', monthlyGoalHours: '' })
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          + Novo Assunto
-        </button>
+    <div className="space-y-8 animate-fadeIn">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+          <span className="text-xs font-label uppercase tracking-widest text-primary mb-2 block">Curadoria</span>
+          <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Núcleo de Conhecimento</h1>
+        </div>
+        <div className="flex gap-4">
+          <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
+            <span className="material-symbols-outlined text-on-surface-variant">filter_list</span>
+            <span className="font-medium text-on-surface-variant">Filtrar</span>
+          </button>
+          <button
+            onClick={() => {
+              setShowForm(true)
+              setEditingSubject(null)
+              setFormData({ name: '', color: COLORS[0], weeklyGoalHours: '', monthlyGoalHours: '' })
+            }}
+            className="gold-accent text-on-secondary px-8 py-3 rounded-lg font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
+          >
+            <span className="material-symbols-outlined">add</span>
+            Novo Assunto
+          </button>
+        </div>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">
-              {editingSubject ? 'Editar' : 'Novo'} Assunto
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Nome *</label>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
+          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+            <div className="p-8 border-b border-outline-variant/10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-label uppercase tracking-[0.15em] text-primary mb-1">Dados do Assunto</p>
+                  <h2 className="text-2xl font-headline font-bold text-on-surface">
+                    {editingSubject ? 'Editar' : 'Novo'} Assunto
+                  </h2>
+                </div>
+                <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Nome *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Ex: Matemática, Física..."
+                  className="input w-full"
+                  placeholder="Ex: Matemática Avançada"
                   maxLength={60}
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Cor</label>
+
+              <div className="space-y-3">
+                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Cor</label>
                 <div className="flex gap-2 flex-wrap">
                   {COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setFormData({ ...formData, color: c })}
-                      className={`w-8 h-8 rounded-full ${
-                        formData.color === c ? 'ring-2 ring-offset-2 ring-blue-600' : ''
+                      className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                        formData.color === c ? 'border-on-surface scale-110' : 'border-transparent'
                       }`}
                       style={{ backgroundColor: c }}
                     />
                   ))}
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Meta Semanal (h)</label>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Meta Semanal (h)</label>
                   <input
                     type="number"
                     step="0.5"
                     min="0"
                     value={formData.weeklyGoalHours}
                     onChange={(e) => setFormData({ ...formData, weeklyGoalHours: e.target.value })}
-                    className="w-full p-3 border rounded-lg"
+                    className="input w-full"
                     placeholder="0"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Meta Mensal (h)</label>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Meta Mensal (h)</label>
                   <input
                     type="number"
                     step="0.5"
                     min="0"
                     value={formData.monthlyGoalHours}
                     onChange={(e) => setFormData({ ...formData, monthlyGoalHours: e.target.value })}
-                    className="w-full p-3 border rounded-lg"
+                    className="input w-full"
                     placeholder="0"
                   />
                 </div>
               </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 py-3 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="flex-1 py-3 bg-surface-container-highest text-on-surface-variant text-sm font-medium rounded-lg hover:bg-surface-container-high transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex-1 py-3 flow-gradient text-on-primary text-sm font-bold rounded-lg shadow-lg hover:scale-[1.02] transition-all"
                 >
                   Salvar
                 </button>
@@ -170,47 +194,56 @@ export default function Subjects() {
       )}
 
       {subjects?.length === 0 ? (
-        <p className="text-gray-500">Nenhum assunto ainda. Crie seu primeiro!</p>
+        <div className="border-2 border-dashed border-outline-variant/20 rounded-xl p-12 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-4">
+            <span className="material-symbols-outlined text-outline text-3xl">library_add</span>
+          </div>
+          <p className="font-headline font-bold text-outline">Expanda Seus Horizontes</p>
+          <p className="text-outline/60 text-xs mt-1">Adicione um novo assunto para acompanhar</p>
+        </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {subjects?.map((subject) => (
             <div
               key={subject.id}
-              className="p-4 bg-white rounded-lg shadow border border-gray-100 hover:shadow-md transition"
+              className="surface-card p-8 min-h-[280px] flex flex-col justify-between group hover:scale-[1.02] transition-all"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: subject.color }}
-                  />
-                  <h3 className="font-medium">{subject.name}</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center">
+                    <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>book</span>
+                  </div>
+                  <span className="badge badge-primary">Ativo</span>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(subject)}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(subject.id)}
-                    className="text-sm text-red-500 hover:text-red-700"
-                  >
-                    Excluir
-                  </button>
+                <div>
+                  <h3 className="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">{subject.name}</h3>
+                  <p className="text-on-surface-variant text-sm mt-1">ID: {subject.id.slice(0, 8)}</p>
                 </div>
               </div>
-              {(subject.weeklyGoalHours || subject.monthlyGoalHours) && (
-                <div className="mt-2 text-sm text-gray-500">
-                  {subject.weeklyGoalHours && (
-                    <span className="mr-3">Semanal: {subject.weeklyGoalHours}h</span>
-                  )}
-                  {subject.monthlyGoalHours && (
-                    <span>Mensal: {subject.monthlyGoalHours}h</span>
-                  )}
+
+              <div className="space-y-4 mt-8">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-label uppercase tracking-widest text-outline">Compromisso Semanal</span>
+                    <p className="text-lg font-headline font-bold text-on-surface">
+                      {subject.weeklyGoalHours || 0} <span className="text-sm font-normal text-outline">/ {subject.weeklyGoalHours || 12}h</span>
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-primary">{subject.weeklyGoalHours ? 70 : 0}%</span>
                 </div>
-              )}
+                <div className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                  <div className="h-full flow-gradient relative" style={{ width: '70%' }}></div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-4 pt-4 border-t border-outline-variant/10">
+                <button onClick={() => handleEdit(subject)} className="text-xs font-medium text-outline hover:text-primary transition-colors">
+                  Editar
+                </button>
+                <button onClick={() => handleDelete(subject.id)} className="text-xs font-medium text-outline hover:text-error transition-colors">
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
         </div>

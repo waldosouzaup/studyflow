@@ -4,12 +4,12 @@ import { useThemeStore } from '../store/theme'
 import clsx from 'clsx'
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: '📊' },
-  { path: '/timer', label: 'Timer', icon: '⏱️' },
-  { path: '/subjects', label: 'Assuntos', icon: '📚' },
-  { path: '/plans', label: 'Planos', icon: '📝' },
-  { path: '/reviews', label: 'Revisões', icon: '🔄' },
-  { path: '/goals', label: 'Metas', icon: '🎯' },
+  { path: '/', label: 'Painel', icon: 'dashboard' },
+  { path: '/timer', label: 'Sessões', icon: 'timer' },
+  { path: '/subjects', label: 'Assuntos', icon: 'menu_book' },
+  { path: '/plans', label: 'Planejamento', icon: 'calendar_today' },
+  { path: '/reviews', label: 'Revisões', icon: 'rate_review' },
+  { path: '/goals', label: 'Desempenho', icon: 'insights' },
 ]
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -28,70 +28,83 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-8">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                StudyFlow
-              </h1>
-              <nav className="hidden md:flex gap-1" aria-label="Navegação principal">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    aria-current={location.pathname === item.path ? 'page' : undefined}
-                    className={clsx(
-                      'px-3 py-2 rounded-lg text-sm font-medium transition',
-                      location.pathname === item.path
-                        ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700'
-                    )}
-                  >
-                    <span className="mr-1" aria-hidden="true">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                aria-label="Alternar tema"
-              >
-                {theme === 'dark' ? '☀️' : '🌙'}
-              </button>
-              {user?.avatarUrl && (
-                <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full" />
+    <div className="min-h-screen bg-surface-dim flex">
+      <aside className="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-lowest py-8 px-4 font-headline font-medium text-sm">
+        <div className="mb-10 px-4">
+          <h1 className="text-xl font-extrabold tracking-widest uppercase text-on-surface">StudyFlow</h1>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-outline mt-1">Santuário Digital</p>
+        </div>
+        
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={clsx(
+                'flex items-center gap-3 px-4 py-3 transition-all duration-200 hover:translate-x-1 rounded-lg',
+                location.pathname === item.path
+                  ? 'bg-surface-container-low text-primary border-r-4 border-primary'
+                  : 'text-on-surface-variant hover:bg-surface-container-low/50'
               )}
-              <button
-                onClick={logout}
-                className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-              >
+            >
+              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-auto pt-6 border-t border-outline-variant/10 space-y-1">
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
+            <span className="material-symbols-outlined text-[20px]">settings</span>
+            <span>Configurações</span>
+          </button>
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
+            <span className="material-symbols-outlined text-[20px]">help_outline</span>
+            <span>Ajuda</span>
+          </button>
+        </div>
+      </aside>
+
+      <div className="flex-1 lg:ml-64">
+        <header className="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-surface-dim border-b border-outline-variant/10">
+          <div className="flex justify-between items-center px-8 py-4 max-w-[1600px] mx-auto">
+            <div className="hidden md:flex items-center gap-6 text-sm">
+              <Link to="/" className="text-on-surface-variant hover:text-on-surface transition-colors">Painel</Link>
+              <Link to="/subjects" className="text-on-surface-variant hover:text-on-surface transition-colors">Assuntos</Link>
+              <Link to="/plans" className="text-on-surface-variant hover:text-on-surface transition-colors">Planejamento</Link>
+              <Link to="/timer" className="text-on-surface-variant hover:text-on-surface transition-colors">Sessões</Link>
+              <Link to="/reviews" className="text-on-surface-variant hover:text-on-surface transition-colors">Revisões</Link>
+              <Link to="/goals" className="text-on-surface-variant hover:text-on-surface transition-colors">Desempenho</Link>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <button onClick={toggleTheme} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
+              </button>
+              <button className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
+              </button>
+              <button className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant">settings</span>
+              </button>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-outline-variant/20 object-cover" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary text-sm font-bold">
+                  {user?.name?.charAt(0) || '?'}
+                </div>
+              )}
+              <button onClick={logout} className="text-xs font-medium text-outline hover:text-error transition-colors">
                 Sair
               </button>
             </div>
           </div>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
-      <footer className="mt-auto border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-            App criado por:{' '}
-            <a 
-              href="https://waldoeller.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline transition"
-            >
-              Waldo Eller
-            </a>
-          </p>
-        </div>
-      </footer>
+        </header>
+
+        <main className="pt-24 px-8 pb-12 max-w-[1600px] mx-auto min-h-screen">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

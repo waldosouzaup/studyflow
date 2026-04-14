@@ -6,6 +6,7 @@ import { PageLoading, ErrorMessage } from '../components/Loading'
 import type { Plan } from '../types/database'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import clsx from 'clsx'
 
 export default function Plans() {
   const userId = useAuthStore((s) => s.user?.id) || ''
@@ -20,8 +21,8 @@ export default function Plans() {
     priority: 'medium' as 'high' | 'medium' | 'low',
   })
 
-  const today = new Date().toISOString().split('T')[0]
-  const { data: plans, isLoading, error } = usePlans(view === 'today' ? today : undefined)
+  const todayStr = new Date().toISOString().split('T')[0]
+  const { data: plans, isLoading, error } = usePlans(view === 'today' ? todayStr : undefined)
   const { data: subjects } = useSubjects()
   const createPlan = useCreatePlan()
   const updatePlan = useUpdatePlan()
@@ -78,7 +79,7 @@ export default function Plans() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Excluir esta tarefa?')) {
+    if (confirm('Excluir tarefa?')) {
       await deletePlan.mutateAsync(id)
     }
   }
@@ -101,237 +102,250 @@ export default function Plans() {
   }
 
   if (isLoading) return <PageLoading />
-  if (error) return <ErrorMessage message="Erro ao carregar planos" />
+  if (error) return <ErrorMessage message="Falha ao carregar planos." />
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Planejamento</h2>
-        <div className="flex gap-2">
+    <div className="space-y-8 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <span className="text-xs font-label uppercase tracking-widest text-primary mb-2 block">Planejamento</span>
+          <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Plano de Hoje</h1>
+        </div>
+        <div className="flex bg-surface-container-low p-1 rounded-lg border border-outline-variant/10">
           <button
             onClick={() => setView('today')}
-            className={`px-4 py-2 rounded-lg ${
-              view === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-100'
-            }`}
+            className={clsx(
+              'px-5 py-2 text-xs font-label uppercase tracking-wider transition-all rounded-md',
+              view === 'today' ? 'bg-surface-container-highest text-on-surface shadow-sm' : 'text-outline hover:text-on-surface'
+            )}
           >
             Hoje
           </button>
           <button
             onClick={() => setView('week')}
-            className={`px-4 py-2 rounded-lg ${
-              view === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-100'
-            }`}
+            className={clsx(
+              'px-5 py-2 text-xs font-label uppercase tracking-wider transition-all rounded-md',
+              view === 'week' ? 'bg-surface-container-highest text-on-surface shadow-sm' : 'text-outline hover:text-on-surface'
+            )}
           >
             Semana
           </button>
         </div>
       </div>
 
-      <button
-        onClick={() => setShowForm(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-6"
-      >
-        + Nova Tarefa
-      </button>
+      <div className="flex flex-col gap-6">
+        <button
+          onClick={() => setShowForm(true)}
+          className="flow-gradient text-on-primary font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all self-start flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined">add</span>
+          Nova Tarefa
+        </button>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">
-              {editingPlan ? 'Editar' : 'Nova'} Tarefa
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Tarefa *</label>
-                <input
-                  type="text"
-                  value={formData.task}
-                  onChange={(e) => setFormData({ ...formData, task: e.target.value })}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="O que você precisa fazer?"
-                  required
-                />
+        {showForm && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
+            <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+              <div className="p-8 border-b border-outline-variant/10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-[10px] font-label uppercase tracking-[0.15em] text-primary mb-1">Dados da Tarefa</p>
+                    <h2 className="text-2xl font-headline font-bold text-on-surface">
+                      {editingPlan ? 'Editar' : 'Nova'} Tarefa
+                    </h2>
+                  </div>
+                  <button onClick={resetForm} className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors">✕</button>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Data</label>
-                <input
-                  type="date"
-                  value={formData.plannedDate}
-                  onChange={(e) => setFormData({ ...formData, plannedDate: e.target.value })}
-                  className="w-full p-3 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Assunto</label>
-                <select
-                  value={formData.subjectId}
-                  onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="">Sem assunto</option>
-                  {subjects?.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Estimativa (min)</label>
+
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Descrição *</label>
                   <input
-                    type="number"
-                    value={formData.estimatedMinutes}
-                    onChange={(e) => setFormData({ ...formData, estimatedMinutes: e.target.value })}
-                    className="w-full p-3 border rounded-lg"
-                    placeholder="30"
+                    type="text"
+                    value={formData.task}
+                    onChange={(e) => setFormData({ ...formData, task: e.target.value })}
+                    className="input w-full"
+                    placeholder="Ex: Resolver exercícios de cálculo"
+                    required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Prioridade</label>
-                  <select
-                    value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full p-3 border rounded-lg"
-                  >
-                    <option value="low">Baixa</option>
-                    <option value="medium">Média</option>
-                    <option value="high">Alta</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="flex-1 py-3 bg-gray-100 rounded-lg hover:bg-gray-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Salvar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {view === 'today' && (
-        <div className="space-y-2">
-          {plans?.length === 0 ? (
-            <p className="text-gray-500">Nenhuma tarefa para hoje!</p>
-          ) : (
-            plans?.map((plan) => (
-              <div
-                key={plan.id}
-                className={`p-4 bg-white rounded-lg shadow border border-gray-100 ${
-                  plan.status === 'done' ? 'opacity-60' : plan.isOverdue ? 'border-red-300' : ''
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Data</label>
                     <input
-                      type="checkbox"
-                      checked={plan.status === 'done'}
-                      onChange={(e) =>
-                        updatePlan.mutate({
-                          id: plan.id,
-                          updates: { status: e.target.checked ? 'done' : 'pending' },
-                        })
-                      }
-                      className="w-5 h-5 rounded"
+                      type="date"
+                      value={formData.plannedDate}
+                      onChange={(e) => setFormData({ ...formData, plannedDate: e.target.value })}
+                      className="input w-full"
                     />
-                    <div>
-                      <span
-                        className={plan.status === 'done' ? 'line-through text-gray-400' : ''}
-                      >
-                        {plan.task}
-                      </span>
-                      {plan.subjectId && (
-                        <span className="ml-2 text-sm text-gray-400">
-                          ({subjects?.find((s) => s.id === plan.subjectId)?.name})
-                        </span>
-                      )}
-                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        plan.priority === 'high'
-                          ? 'bg-red-100 text-red-700'
-                          : plan.priority === 'medium'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Assunto</label>
+                    <select
+                      value={formData.subjectId}
+                      onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
+                      className="input w-full"
                     >
-                      {plan.priority === 'high' ? 'Alta' : plan.priority === 'medium' ? 'Média' : 'Baixa'}
-                    </span>
-                    <button
-                      onClick={() => handleEdit(plan)}
-                      className="text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(plan.id)}
-                      className="text-sm text-red-500 hover:text-red-700"
-                    >
-                      Excluir
-                    </button>
+                      <option value="">Nenhum</option>
+                      {subjects?.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
 
-      {view === 'week' && (
-        <div className="grid grid-cols-7 gap-2">
-          {weekDays.map((day) => {
-            const dayPlans = getPlansForDate(day)
-            const isToday = isSameDay(day, new Date())
-            return (
-              <div
-                key={day.toISOString()}
-                className={`p-3 rounded-lg min-h-[150px] ${
-                  isToday ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50'
-                }`}
-              >
-                <div className="text-sm font-medium mb-2">
-                  {format(day, 'EEE', { locale: ptBR })}
-                </div>
-                <div className="text-lg font-bold mb-2">{format(day, 'd')}</div>
-                <div className="space-y-1">
-                  {dayPlans.slice(0, 3).map((plan) => (
-                    <div
-                      key={plan.id}
-                      className={`text-xs p-1 rounded ${
-                        plan.status === 'done'
-                          ? 'bg-green-100 text-green-700'
-                          : plan.isOverdue
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-white'
-                      }`}
-                    >
-                      {plan.task.substring(0, 20)}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Tempo (min)</label>
+                    <input
+                      type="number"
+                      value={formData.estimatedMinutes}
+                      onChange={(e) => setFormData({ ...formData, estimatedMinutes: e.target.value })}
+                      className="input w-full"
+                      placeholder="30"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Prioridade</label>
+                    <div className="flex gap-1 bg-surface-container-highest rounded-lg border border-outline-variant/10 p-1">
+                      {(['low', 'medium', 'high'] as const).map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, priority: p })}
+                          className={clsx(
+                            'flex-1 py-2 text-[10px] font-label uppercase tracking-wider transition-all rounded-md',
+                            formData.priority === p ? 'bg-surface-container-high text-on-surface shadow-sm' : 'text-outline hover:text-on-surface'
+                          )}
+                        >
+                          {p === 'high' ? 'Alta' : p === 'medium' ? 'Média' : 'Baixa'}
+                        </button>
+                      ))}
                     </div>
-                  ))}
-                  {dayPlans.length > 3 && (
-                    <div className="text-xs text-gray-500">
-                      +{dayPlans.length - 3} mais
-                    </div>
-                  )}
+                  </div>
                 </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="flex-1 py-3 bg-surface-container-highest text-on-surface-variant text-sm font-medium rounded-lg hover:bg-surface-container-high transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 flow-gradient text-on-primary text-sm font-bold rounded-lg shadow-lg hover:scale-[1.02] transition-all"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {view === 'today' && (
+          <div className="space-y-2">
+            {plans?.length === 0 ? (
+              <div className="surface-card p-12 text-center">
+                <p className="text-outline">Nenhuma tarefa para hoje. Aproveite seu tempo livre!</p>
               </div>
-            )
-          })}
-        </div>
-      )}
+            ) : (
+              plans?.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={clsx(
+                    'surface-card p-4 flex items-center gap-4 group',
+                    plan.status === 'done' ? 'opacity-60' : ''
+                  )}
+                >
+                  <button
+                    onClick={() => updatePlan.mutate({ id: plan.id, updates: { status: plan.status === 'done' ? 'pending' : 'done' } })}
+                    className={clsx(
+                      'w-5 h-5 rounded border flex items-center justify-center transition-all',
+                      plan.status === 'done' ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant hover:border-primary'
+                    )}
+                  >
+                    {plan.status === 'done' && <span className="material-symbols-outlined text-sm">check</span>}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <span className={clsx('font-medium', plan.status === 'done' ? 'line-through text-outline' : '')}>
+                      {plan.task}
+                    </span>
+                    {plan.subjectId && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjects?.find(s => s.id === plan.subjectId)?.color }} />
+                        <span className="text-[10px] font-label text-outline uppercase">
+                          {subjects?.find((s) => s.id === plan.subjectId)?.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span className={clsx(
+                    'text-[10px] font-label uppercase px-2 py-1 rounded-md',
+                    plan.priority === 'high' ? 'bg-error/10 text-error' : plan.priority === 'medium' ? 'bg-primary/10 text-primary' : 'bg-outline-variant/20 text-outline'
+                  )}>
+                    {plan.priority === 'high' ? 'Alta' : plan.priority === 'medium' ? 'Média' : 'Baixa'}
+                  </span>
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleEdit(plan)} className="text-[10px] font-label text-outline hover:text-primary transition-colors">Editar</button>
+                    <button onClick={() => handleDelete(plan.id)} className="text-[10px] font-label text-outline hover:text-error transition-colors">Excluir</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {view === 'week' && (
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+            {weekDays.map((day) => {
+              const dayPlans = getPlansForDate(day)
+              const isToday = isSameDay(day, new Date())
+              return (
+                <div
+                  key={day.toISOString()}
+                  className={clsx(
+                    'surface-card p-4 rounded-xl',
+                    isToday ? 'border-primary/20' : ''
+                  )}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className={clsx('text-[10px] font-label uppercase tracking-wider', isToday ? 'text-primary' : 'text-outline')}>
+                        {format(day, 'EEE', { locale: ptBR })}
+                      </div>
+                      <div className={clsx('text-xl font-headline font-bold', isToday ? 'text-primary' : 'text-on-surface')}>
+                        {format(day, 'd')}
+                      </div>
+                    </div>
+                    {isToday && <div className="w-2 h-2 rounded-full bg-primary" />}
+                  </div>
+
+                  <div className="space-y-2">
+                    {dayPlans.slice(0, 4).map((plan) => (
+                      <div key={plan.id} className="flex items-center gap-2">
+                        <div className={clsx('w-1.5 h-1.5 rounded-full shrink-0', plan.status === 'done' ? 'bg-secondary' : 'bg-primary')} />
+                        <span className={clsx('text-[10px] font-label truncate', plan.status === 'done' ? 'text-outline line-through' : 'text-on-surface-variant')}>
+                          {plan.task}
+                        </span>
+                      </div>
+                    ))}
+                    {dayPlans.length > 4 && (
+                      <div className="text-[10px] font-label text-outline pt-1">+ {dayPlans.length - 4} mais</div>
+                    )}
+                    {dayPlans.length === 0 && (
+                      <div className="text-[10px] text-outline/50 italic">Livre</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -25,7 +25,6 @@ export default function Goals() {
     if (type === 'daily') return { start: format(now, 'yyyy-MM-dd'), end: format(now, 'yyyy-MM-dd') }
     if (type === 'weekly') return { start: format(startOfWeek(now), 'yyyy-MM-dd'), end: format(endOfWeek(now), 'yyyy-MM-dd') }
     return { start: format(startOfMonth(now), 'yyyy-MM-dd'), end: format(endOfMonth(now), 'yyyy-MM-dd') }
-    return { start: '', end: '' }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,90 +48,141 @@ export default function Goals() {
   }
 
   if (isLoading) return <PageLoading />
-  if (error) return <ErrorMessage message="Erro ao carregar metas" />
+  if (error) return <ErrorMessage message="Falha ao carregar metas." />
 
   const dailyGoals = goals?.filter((g) => g.type === 'daily') || []
   const weeklyGoals = goals?.filter((g) => g.type === 'weekly') || []
   const monthlyGoals = goals?.filter((g) => g.type === 'monthly') || []
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Metas</h2>
-        <button onClick={() => setShowForm(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          + Nova Meta
+    <div className="space-y-8 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <span className="text-xs font-label uppercase tracking-widest text-secondary mb-2 block">Painel de Análise</span>
+          <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Desempenho de Estudo</h1>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
+        >
+          <span className="material-symbols-outlined">add</span>
+          Nova Meta
         </button>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Nova Meta</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Tipo</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="daily">Diaria</option>
-                  <option value="weekly">Semanal</option>
-                  <option value="monthly">Mensal</option>
-                </select>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
+          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+            <div className="p-8 border-b border-outline-variant/10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-label uppercase tracking-[0.15em] text-secondary mb-1">Nova Meta</p>
+                  <h2 className="text-2xl font-headline font-bold text-on-surface">Configurar Meta</h2>
+                </div>
+                <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors">✕</button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Assunto</label>
+            </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Ciclo</label>
+                <div className="flex gap-2 bg-surface-container-highest rounded-lg border border-outline-variant/10 p-1">
+                  {(['daily', 'weekly', 'monthly'] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, type: t })}
+                      className={`flex-1 py-3 text-[10px] font-label uppercase tracking-wider transition-all rounded-md ${
+                        formData.type === t 
+                          ? 'bg-surface-container-high text-on-surface shadow-sm' 
+                          : 'text-outline hover:text-on-surface'
+                      }`}
+                    >
+                      {t === 'daily' ? 'Diário' : t === 'weekly' ? 'Semanal' : 'Mensal'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Assunto</label>
                 <select
                   value={formData.subjectId}
                   onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                  className="w-full p-3 border rounded-lg"
+                  className="input w-full"
                 >
-                  <option value="">Global (todos)</option>
+                  <option value="">Todos os assuntos</option>
                   {subjects?.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Meta (minutos)</label>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Meta (minutos)</label>
                 <input
                   type="number"
                   value={formData.targetMinutes}
                   onChange={(e) => setFormData({ ...formData, targetMinutes: parseInt(e.target.value) })}
-                  className="w-full p-3 border rounded-lg"
+                  className="input w-full"
                   min={1}
                 />
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-3 bg-gray-100 rounded-lg">Cancelar</button>
-                <button type="submit" className="flex-1 py-3 bg-blue-600 text-white rounded-lg">Salvar</button>
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-3 bg-surface-container-highest text-on-surface-variant text-sm font-medium rounded-lg hover:bg-surface-container-high transition-colors">Cancelar</button>
+                <button type="submit" className="flex-1 py-3 gold-accent text-on-secondary text-sm font-bold rounded-lg shadow-lg hover:scale-[1.02] transition-all">Salvar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      <div className="space-y-6">
-        <section>
-          <h3 className="text-lg font-medium mb-3">Diárias</h3>
-          {dailyGoals.length === 0 ? <p className="text-gray-500">Nenhuma meta diária</p> : (
-            <div className="space-y-2">
-              {dailyGoals.map((goal) => <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />)}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section className="space-y-6">
+          <div className="flex items-center gap-4">
+            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Diário</h3>
+            <div className="flex-1 h-px bg-outline-variant/30" />
+          </div>
+          {dailyGoals.length === 0 ? (
+            <div className="surface-card p-8 text-center">
+              <p className="text-sm text-outline">Nenhuma meta diária definida.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {dailyGoals.map((goal) => (
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+              ))}
             </div>
           )}
         </section>
-        <section>
-          <h3 className="text-lg font-medium mb-3">Semanais</h3>
-          {weeklyGoals.length === 0 ? <p className="text-gray-500">Nenhuma meta semanal</p> : (
-            <div className="space-y-2">
-              {weeklyGoals.map((goal) => <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />)}
+
+        <section className="space-y-6">
+          <div className="flex items-center gap-4">
+            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Semanal</h3>
+            <div className="flex-1 h-px bg-outline-variant/30" />
+          </div>
+          {weeklyGoals.length === 0 ? (
+            <div className="surface-card p-8 text-center">
+              <p className="text-sm text-outline">Nenhuma meta semanal definida.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {weeklyGoals.map((goal) => (
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+              ))}
             </div>
           )}
         </section>
-        <section>
-          <h3 className="text-lg font-medium mb-3">Mensais</h3>
-          {monthlyGoals.length === 0 ? <p className="text-gray-500">Nenhuma meta mensal</p> : (
-            <div className="space-y-2">
-              {monthlyGoals.map((goal) => <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />)}
+
+        <section className="space-y-6">
+          <div className="flex items-center gap-4">
+            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Mensal</h3>
+            <div className="flex-1 h-px bg-outline-variant/30" />
+          </div>
+          {monthlyGoals.length === 0 ? (
+            <div className="surface-card p-8 text-center">
+              <p className="text-sm text-outline">Nenhuma meta mensal definida.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {monthlyGoals.map((goal) => (
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+              ))}
             </div>
           )}
         </section>
@@ -143,25 +193,47 @@ export default function Goals() {
 
 function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name: string; color: string }; updateGoal: any }) {
   return (
-    <div className="p-4 bg-white rounded-lg shadow border border-gray-100">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          {subject && <span className="w-3 h-3 rounded-full" style={{ backgroundColor: subject.color }} />}
-          <span className="font-medium">{subject?.name || 'Global'}</span>
-          <span className="text-gray-500 text-sm">- {goal.type === 'daily' ? 'hoje' : goal.type === 'weekly' ? 'esta semana' : 'este mês'}</span>
+    <div className="surface-card p-6 group hover:scale-[1.02] transition-all">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-4 rounded-full" style={{ backgroundColor: subject?.color || '#ADC7FF' }} />
+            <h4 className="text-[10px] font-label uppercase tracking-[0.15em] text-on-surface-variant">
+              {subject?.name || 'GLOBAL'}
+            </h4>
+          </div>
+          <span className="text-[9px] font-mono text-outline uppercase tracking-wider">
+            {goal.type === 'daily' ? 'Hoje' : goal.type === 'weekly' ? 'Esta semana' : 'Este mês'}
+          </span>
         </div>
         <button
           onClick={() => updateGoal.mutate({ id: goal.id, updates: { isActive: !goal.isActive } })}
-          className={`px-2 py-1 rounded text-sm ${goal.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100'}`}
+          className={`px-2.5 py-1 text-[9px] font-label uppercase tracking-wider rounded-md transition-all ${
+            goal.isActive 
+              ? 'bg-primary/10 text-primary' 
+              : 'bg-surface-container-highest text-outline'
+          }`}
         >
-          {goal.isActive ? 'Ativa' : 'Inativa'}
+          {goal.isActive ? 'Ativo' : 'Pausado'}
         </button>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-500 rounded-full" style={{ width: '0%' }} />
+      
+      <div className="space-y-3">
+        <div className="flex items-end justify-between">
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-headline font-bold text-on-surface">0</span>
+            <span className="text-sm text-outline">/ {goal.targetMinutes}</span>
+            <span className="text-[9px] font-label text-outline ml-1 uppercase tracking-tight">min</span>
+          </div>
+          <span className="text-[10px] font-mono font-bold text-outline">0%</span>
         </div>
-        <span className="text-sm text-gray-500">0/{goal.targetMinutes}min</span>
+        
+        <div className="h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+          <div 
+            className="h-full flow-gradient rounded-full transition-all duration-1000" 
+            style={{ width: '0%' }} 
+          />
+        </div>
       </div>
     </div>
   )
