@@ -77,6 +77,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+            App criado por:{' '}
+            <a 
+              href="https://waldoeller.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline transition"
+            >
+              Waldo Eller
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
