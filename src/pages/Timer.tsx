@@ -32,15 +32,28 @@ export default function Timer() {
 
   useEffect(() => {
     if (activeSession && !activeSession.finished_at) {
-      setSessionState(activeSession.paused_at ? 'paused' : 'active')
+      const isPaused = !!activeSession.paused_at
+      setSessionState(isPaused ? 'paused' : 'active')
       setSelectedSubject(activeSession.subject_id)
       setStartedAt(activeSession.started_at)
+      
       const startTime = new Date(activeSession.started_at).getTime()
-      const pausedDuration = activeSession.paused_at
-        ? new Date(activeSession.paused_at).getTime() - startTime
-        : 0
-      totalPausedTime.current = pausedDuration
-      setElapsedSeconds(Math.floor((Date.now() - startTime - pausedDuration) / 1000))
+      const now = Date.now()
+
+      if (isPaused) {
+        // Se está pausado, o tempo estudado é a diferença entre started_at e paused_at
+        const pauseTime = new Date(activeSession.paused_at!).getTime()
+        const studyDuration = pauseTime - startTime
+        setElapsedSeconds(Math.floor(studyDuration / 1000))
+        // O tempo de pausa atual que deve ser descontado ao retomar é (agora - momento da pausa)
+        totalPausedTime.current = now - pauseTime
+      } else {
+        // Se está ativo, calculamos o tempo decorrido desde o início, 
+        // descontando pausas anteriores que estavam na memória (ou 0 se recarregou)
+        const currentElapsed = Math.floor((now - startTime - totalPausedTime.current) / 1000)
+        setElapsedSeconds(currentElapsed > 0 ? currentElapsed : 0)
+      }
+
       if (activeSession.topic) setTopic(activeSession.topic)
       if (activeSession.notes) setNotes(activeSession.notes)
       if (activeSession.difficulty) setDifficulty(activeSession.difficulty)
