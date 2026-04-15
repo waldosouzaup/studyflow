@@ -11,56 +11,43 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: 'system',
-      setTheme: (theme) => set({ theme }),
+      theme: 'dark',
+      setTheme: (theme) => {
+        set({ theme })
+        applyThemeToDOM(theme)
+      },
     }),
     { name: 'theme-storage' }
   )
 )
 
-let themeInitialized = false
-let mediaQueryCleanup: (() => void) | null = null
+function applyThemeToDOM(theme: Theme) {
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  if (isDark) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+let initialized = false
 
 export function initTheme() {
-  if (themeInitialized) return
-  themeInitialized = true
+  if (initialized) return
+  initialized = true
 
   const theme = useThemeStore.getState().theme
-  
-  const applyTheme = () => {
-    const currentTheme = useThemeStore.getState().theme
-    const isDark = 
-      currentTheme === 'dark' || 
-      (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-  
-  applyTheme()
-  
-  // Clean up any previous listener before adding a new one
-  if (mediaQueryCleanup) {
-    mediaQueryCleanup()
-  }
+  applyThemeToDOM(theme)
 
-  if (theme === 'system') {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handler = () => applyTheme()
-    mediaQuery.addEventListener('change', handler)
-    mediaQueryCleanup = () => mediaQuery.removeEventListener('change', handler)
-  }
-
-  // Re-apply theme when store changes
-  useThemeStore.subscribe(() => {
-    themeInitialized = false
-    if (mediaQueryCleanup) {
-      mediaQueryCleanup()
-      mediaQueryCleanup = null
+  // Listen for OS-level theme changes when in 'system' mode
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.addEventListener('change', () => {
+    const current = useThemeStore.getState().theme
+    if (current === 'system') {
+      applyThemeToDOM('system')
     }
-    initTheme()
   })
 }

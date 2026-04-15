@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
 import { supabase } from '../lib/supabase'
+import SettingsModal from './SettingsModal'
 import clsx from 'clsx'
 
 const navItems = [
@@ -18,6 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
+  const [showSettings, setShowSettings] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -32,11 +35,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(newTheme)
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
   }
 
   return (
@@ -66,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-outline-variant/10 space-y-1">
-          <button onClick={() => alert('Página de Configurações em breve.')} className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
+          <button onClick={() => setShowSettings(true)} className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
             <span className="material-symbols-outlined text-[20px]">settings</span>
             <span>Configurações</span>
           </button>
@@ -96,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <button onClick={() => alert('Notificações em breve.')} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
                 <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
               </button>
-              <button onClick={() => alert('Página de Configurações em breve.')} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+              <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
                 <span className="material-symbols-outlined text-on-surface-variant">settings</span>
               </button>
               {user?.avatar_url ? (
@@ -117,6 +115,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   )
 }
