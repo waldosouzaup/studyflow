@@ -24,51 +24,73 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return user ? <>{children}</> : <Navigate to="/login" />
 }
 
+// Ensure the auth user exists in public.users (required for FK constraints)
+async function ensurePublicUser(authUser: any) {
+  try {
+    await supabase.from('users').upsert({
+      id: authUser.id,
+      email: authUser.email || '',
+      name: authUser.user_metadata?.full_name || authUser.email || '',
+      avatar_url: authUser.user_metadata?.avatar_url || null,
+      google_id: authUser.user_metadata?.provider_id || authUser.id,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' })
+  } catch (e) {
+    console.warn('Failed to sync public user:', e)
+  }
+}
+
+function buildUser(authUser: any, createdAt: string, updatedAt: string) {
+  return {
+    id: authUser.id,
+    email: authUser.email || '',
+    name: authUser.user_metadata?.full_name || '',
+    avatarUrl: authUser.user_metadata?.avatar_url || null,
+    googleId: authUser.user_metadata?.provider_id || '',
+    streakCount: 0,
+    streakLastDate: null,
+    createdAt,
+    updatedAt,
+  }
+}
+
 function AuthSync({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
   const { setUser, logout } = useAuthStore()
 
   useEffect(() => {
     // Check existing session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const user = {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || '',
-          avatarUrl: session.user.user_metadata?.avatar_url || null,
-          googleId: session.user.user_metadata?.provider_id || '',
-          streakCount: 0,
-          streakLastDate: null,
-          createdAt: session.user.created_at || new Date().toISOString(),
-          updatedAt: session.user.updated_at || new Date().toISOString(),
-        }
-        setUser(user, session.access_token)
-      } else {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error || !session?.user) {
+        supabase.auth.signOut().catch(() => {})
         logout()
+      } else {
+        await ensurePublicUser(session.user)
+        const user = buildUser(
+          session.user,
+          session.user.created_at || new Date().toISOString(),
+          session.user.updated_at || new Date().toISOString()
+        )
+        setUser(user, session.access_token)
       }
       setReady(true)
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const user = {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || '',
-          avatarUrl: session.user.user_metadata?.avatar_url || null,
-          googleId: session.user.user_metadata?.provider_id || '',
-          streakCount: 0,
-          streakLastDate: null,
-          createdAt: session.user.created_at || new Date().toISOString(),
-          updatedAt: session.user.updated_at || new Date().toISOString(),
-        }
-        setUser(user, session.access_token)
-      } else {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session?.user) {
         logout()
         queryClient.clear()
+        return
       }
+
+      await ensurePublicUser(session.user)
+      const user = buildUser(
+        session.user,
+        session.user.created_at || new Date().toISOString(),
+        session.user.updated_at || new Date().toISOString()
+      )
+      setUser(user, session.access_token)
     })
 
     return () => subscription.unsubscribe()
@@ -77,6 +99,7 @@ function AuthSync({ children }: { children: React.ReactNode }) {
   if (!ready) return <PageLoading />
   return <>{children}</>
 }
+
 
 function App() {
   initTheme()
