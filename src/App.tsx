@@ -15,6 +15,7 @@ import Plans from './pages/Plans'
 import Reviews from './pages/Reviews'
 import Timer from './pages/Timer'
 import Goals from './pages/Goals'
+import Reset from './pages/Reset'
 import './index.css'
 
 const queryClient = new QueryClient()
@@ -110,6 +111,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/reset" element={<Reset />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route
               path="/*"
