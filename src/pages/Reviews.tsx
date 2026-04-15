@@ -44,7 +44,7 @@ export default function Reviews() {
   }
 
   const handleComplete = async (review: Review, intervalDays?: number) => {
-    if (intervalDays && review.status === 'done') {
+    if (intervalDays) {
       const newDate = new Date()
       newDate.setDate(newDate.getDate() + intervalDays)
       await updateReview.mutateAsync({

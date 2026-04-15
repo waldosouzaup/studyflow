@@ -26,6 +26,7 @@ export default function Timer() {
   const [notes, setNotes] = useState('')
   const [difficulty, setDifficulty] = useState(2)
   const [focus, setFocus] = useState(2)
+  const [localSessionId, setLocalSessionId] = useState<string | null>(null)
 
   const intervalRef = useRef<number | undefined>(undefined)
   const totalPausedTime = useRef(0)
@@ -109,41 +110,43 @@ export default function Timer() {
     }
     
     try {
-      console.log(`[Timer] Inicando sessão ${sessionType}:`, sessionData)
+      console.log(`[Timer] Iniciando sessão ${sessionType}:`, sessionData)
       await createSession.mutateAsync(sessionData)
+      setLocalSessionId(sessionId)
       setSessionState('active')
     } catch (err: any) {
       console.error('[Timer] Falha ao criar sessão no servidor:', err)
-      // Se falhar no servidor, tentamos salvar localmente
       try {
         await saveOfflineSession(sessionData)
+        setLocalSessionId(sessionId)
         setSessionState('active')
         console.log('[Timer] Sessão salva em modo offline com ID:', sessionId)
       } catch (offlineErr) {
         console.error('[Timer] Falha crítica: não foi possível salvar nem offline:', offlineErr)
         alert('Erro ao iniciar sessão. Verifique sua conexão.')
-        // Resetamos o estado pois não conseguimos iniciar de nenhuma forma
         setStartedAt(null)
       }
     }
   }
 
   const pauseSession = useCallback(async () => {
-    if (!activeSession) return
+    const sessionId = activeSession?.id || localSessionId
+    if (!sessionId) return
     setSessionState('paused')
     try {
       await updateSession.mutateAsync({
-        id: activeSession.id,
+        id: sessionId,
         updates: { paused_at: new Date().toISOString() },
       })
     } catch (err) {
-      console.error(err)
+      console.error('[Timer] Erro ao pausar:', err)
     }
-  }, [activeSession, updateSession])
+  }, [activeSession, localSessionId, updateSession])
 
   const resumeSession = useCallback(async () => {
-    if (!activeSession || !startedAt) return
-    const paused_at = activeSession.paused_at
+    const sessionId = activeSession?.id || localSessionId
+    if (!sessionId || !startedAt) return
+    const paused_at = activeSession?.paused_at
     if (paused_at) {
       const pauseDuration = Date.now() - new Date(paused_at).getTime()
       totalPausedTime.current += pauseDuration
@@ -151,13 +154,13 @@ export default function Timer() {
     setSessionState('active')
     try {
       await updateSession.mutateAsync({
-        id: activeSession.id,
+        id: sessionId,
         updates: { paused_at: null },
       })
     } catch (err) {
-      console.error(err)
+      console.error('[Timer] Erro ao retomar:', err)
     }
-  }, [activeSession, startedAt, updateSession])
+  }, [activeSession, localSessionId, startedAt, updateSession])
 
   const finishSession = async () => {
     const durationMinutes = Math.floor(elapsedSeconds / 60)
@@ -165,11 +168,12 @@ export default function Timer() {
       alert('A sessão deve ter pelo menos 1 minuto para ser registrada')
       return
     }
-    if (!activeSession) return
+    const sessionId = activeSession?.id || localSessionId
+    if (!sessionId) return
     
     try {
       await updateSession.mutateAsync({
-        id: activeSession.id,
+        id: sessionId,
         updates: {
           finished_at: new Date().toISOString(),
           duration_minutes: durationMinutes,
@@ -181,19 +185,21 @@ export default function Timer() {
       })
       setSessionState('finished')
     } catch (err) {
+      console.error('[Timer] Erro ao finalizar:', err)
       alert('Erro ao finalizar sessão')
     }
   }
 
   const createReviewFromSession = async (intervalDays: number) => {
-    if (!activeSession) return
+    const sessionId = activeSession?.id || localSessionId
+    if (!sessionId) return
     const reviewDate = new Date()
     reviewDate.setDate(reviewDate.getDate() + intervalDays)
     try {
       await createReview.mutateAsync({
-        user_id: activeSession.user_id,
+        user_id: activeSession?.user_id || userId,
         subject_id: selectedSubject,
-        session_id: activeSession.id,
+        session_id: sessionId,
         topic: topic || 'Revisão',
         review_date: reviewDate.toISOString().split('T')[0],
         status: 'pending',
@@ -213,6 +219,7 @@ export default function Timer() {
     setNotes('')
     setDifficulty(2)
     setFocus(2)
+    setLocalSessionId(null)
     totalPausedTime.current = 0
   }
 
@@ -300,14 +307,14 @@ export default function Timer() {
           <div className="flex items-center gap-8 animate-scaleIn">
             <button
               onClick={pauseSession}
-              disabled={isLoading || !activeSession}
+              disabled={isLoading || (!activeSession && !localSessionId)}
               className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all active:scale-90 border border-outline-variant/10 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-2xl">pause</span>
             </button>
             <button
               onClick={finishSession}
-              disabled={isLoading || !activeSession}
+              disabled={isLoading || (!activeSession && !localSessionId)}
               className="w-24 h-24 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-5xl">stop</span>
@@ -315,7 +322,7 @@ export default function Timer() {
             {sessionState === 'paused' && (
               <button
                 onClick={resumeSession}
-                disabled={isLoading || !activeSession}
+                disabled={isLoading || (!activeSession && !localSessionId)}
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-primary/10 transition-all active:scale-90 border border-primary/20 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-2xl">play_arrow</span>

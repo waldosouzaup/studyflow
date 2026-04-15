@@ -221,11 +221,8 @@ function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name:
       <div className="space-y-3">
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-headline font-bold text-on-surface">0</span>
-            <span className="text-sm text-outline">/ {goal.target_minutes}</span>
-            <span className="text-[9px] font-label text-outline ml-1 uppercase tracking-tight">min</span>
+            <span className="text-sm font-label text-outline uppercase tracking-wider">Progresso calculado ao final de cada sessão</span>
           </div>
-          <span className="text-[10px] font-mono font-bold text-outline">0%</span>
         </div>
         
         <div className="h-1.5 bg-surface-container-highest rounded-full overflow-hidden">

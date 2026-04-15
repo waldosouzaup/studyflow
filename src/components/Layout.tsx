@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
+import { supabase } from '../lib/supabase'
 import clsx from 'clsx'
 
 const navItems = [
@@ -14,8 +15,19 @@ const navItems = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (e) {
+      console.error('Erro ao deslogar do Supabase:', e)
+    }
+    logout()
+    navigate('/login')
+  }
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -94,7 +106,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {user?.name?.charAt(0) || '?'}
                 </div>
               )}
-              <button onClick={logout} className="text-xs font-medium text-outline hover:text-error transition-colors">
+              <button onClick={handleLogout} className="text-xs font-medium text-outline hover:text-error transition-colors">
                 Sair
               </button>
             </div>

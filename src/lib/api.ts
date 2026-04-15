@@ -111,7 +111,7 @@ export const sessionApi = {
         notes: session.notes,
         difficulty: session.difficulty,
         focus: session.focus,
-        session_type: session.sessionType || session.session_type,
+        session_type: session.sessionType ?? session.session_type ?? 'free',
         is_offline_sync: session.isOfflineSync !== undefined ? session.isOfflineSync : session.is_offline_sync,
       })
       .select()

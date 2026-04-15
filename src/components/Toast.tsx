@@ -35,7 +35,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-12 right-12 z-[200] flex flex-col gap-px bg-border-light dark:bg-border-dark border border-border-light dark:border-border-dark">
+      <div className="fixed bottom-12 right-12 z-[200] flex flex-col gap-3">
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
         ))}
@@ -58,13 +58,13 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) =
 
   const typeColor = {
     success: 'text-primary',
-    error: 'text-red-500',
-    info: 'text-text-primary',
+    error: 'text-error',
+    info: 'text-on-surface',
   }[toast.type]
 
   return (
     <div
-      className="bg-surface-light dark:bg-surface-dark p-6 min-w-[320px] animate-scaleIn flex flex-col gap-2"
+      className="bg-surface-container-low p-6 min-w-[320px] animate-scaleIn flex flex-col gap-2 rounded-xl border border-outline-variant/10 shadow-elevated backdrop-blur-md"
     >
       <div className="flex justify-between items-start">
         <span className={`text-[8px] font-bold uppercase tracking-[0.4em] ${typeColor}`}>
@@ -72,16 +72,16 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) =
         </span>
         <button 
           onClick={() => onRemove(toast.id)} 
-          className="text-text-tertiary hover:text-text-primary text-[10px] tracking-widest leading-none outline-none"
+          className="text-outline hover:text-on-surface text-[10px] tracking-widest leading-none outline-none"
         >
           FECHAR
         </button>
       </div>
-      <p className="text-[10px] font-mono text-text-secondary uppercase tracking-widest leading-relaxed mt-1">
+      <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-widest leading-relaxed mt-1">
         {toast.message}
       </p>
       
-      <div className="mt-4 h-[1px] bg-border-light dark:bg-border-dark relative overflow-hidden">
+      <div className="mt-4 h-[1px] bg-outline-variant/20 relative overflow-hidden">
         <div className="absolute inset-0 bg-primary animate-toastTimer origin-left" />
       </div>
     </div>

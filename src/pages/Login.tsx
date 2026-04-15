@@ -39,7 +39,7 @@ export default function Login() {
         setIsLogin(true)
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao processar请求')
+      setError(err.message || 'Erro ao processar requisição')
     } finally {
       setLoading(false)
     }

@@ -5,20 +5,20 @@ interface StudyFlowDB extends DBSchema {
     key: string
     value: {
       id: string
-      userId: string
-      subjectId: string
+      user_id: string
+      subject_id: string
       date: string
-      startedAt: string
-      finishedAt: string | null
-      pausedAt: string | null
-      durationMinutes: number
+      started_at: string
+      finished_at: string | null
+      paused_at: string | null
+      duration_minutes: number
       topic: string | null
       notes: string | null
       difficulty: number | null
       focus: number | null
-      sessionType: string
-      isOfflineSync: boolean
-      createdAt: string
+      session_type: string
+      is_offline_sync: boolean
+      created_at?: string
     }
     indexes: { 'by-date': string; 'by-user': string }
   }
@@ -38,11 +38,20 @@ let db: IDBPDatabase<StudyFlowDB> | null = null
 
 export async function initDB() {
   if (db) return db
-  db = await openDB<StudyFlowDB>('studyflow', 1, {
-    upgrade(db) {
+  db = await openDB<StudyFlowDB>('studyflow', 2, {
+    upgrade(db, oldVersion) {
+      // Delete old stores if upgrading from v1 (camelCase schema)
+      if (oldVersion < 2) {
+        if (db.objectStoreNames.contains('sessions')) {
+          db.deleteObjectStore('sessions')
+        }
+        if (db.objectStoreNames.contains('queue')) {
+          db.deleteObjectStore('queue')
+        }
+      }
       const sessionStore = db.createObjectStore('sessions', { keyPath: 'id' })
       sessionStore.createIndex('by-date', 'date')
-      sessionStore.createIndex('by-user', 'userId')
+      sessionStore.createIndex('by-user', 'user_id')
       db.createObjectStore('queue', { keyPath: 'id', autoIncrement: true })
     },
   })

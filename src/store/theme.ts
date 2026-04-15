@@ -18,13 +18,20 @@ export const useThemeStore = create<ThemeState>()(
   )
 )
 
+let themeInitialized = false
+let mediaQueryCleanup: (() => void) | null = null
+
 export function initTheme() {
+  if (themeInitialized) return
+  themeInitialized = true
+
   const theme = useThemeStore.getState().theme
   
   const applyTheme = () => {
+    const currentTheme = useThemeStore.getState().theme
     const isDark = 
-      theme === 'dark' || 
-      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      currentTheme === 'dark' || 
+      (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
     
     if (isDark) {
       document.documentElement.classList.add('dark')
@@ -35,8 +42,25 @@ export function initTheme() {
   
   applyTheme()
   
+  // Clean up any previous listener before adding a new one
+  if (mediaQueryCleanup) {
+    mediaQueryCleanup()
+  }
+
   if (theme === 'system') {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', applyTheme)
+    const handler = () => applyTheme()
+    mediaQuery.addEventListener('change', handler)
+    mediaQueryCleanup = () => mediaQuery.removeEventListener('change', handler)
   }
+
+  // Re-apply theme when store changes
+  useThemeStore.subscribe(() => {
+    themeInitialized = false
+    if (mediaQueryCleanup) {
+      mediaQueryCleanup()
+      mediaQueryCleanup = null
+    }
+    initTheme()
+  })
 }

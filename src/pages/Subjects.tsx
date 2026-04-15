@@ -232,15 +232,14 @@ export default function Subjects() {
               <div className="space-y-4 mt-8">
                 <div className="flex justify-between items-end">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-label uppercase tracking-widest text-outline">Compromisso Semanal</span>
+                    <span className="text-[10px] font-label uppercase tracking-widest text-outline">Meta Semanal</span>
                     <p className="text-lg font-headline font-bold text-on-surface">
-                      {subject.weekly_goal_hours || 0} <span className="text-sm font-normal text-outline">/ {subject.weekly_goal_hours || 12}h</span>
+                      {subject.weekly_goal_hours || '—'} <span className="text-sm font-normal text-outline">h/semana</span>
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-primary">{subject.weekly_goal_hours ? 70 : 0}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                  <div className="h-full flow-gradient relative" style={{ width: '70%' }}></div>
+                  <div className="h-full flow-gradient relative" style={{ width: '0%' }}></div>
                 </div>
               </div>
 

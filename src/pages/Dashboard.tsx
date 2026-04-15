@@ -1,6 +1,6 @@
 import { useAuthStore } from '../store/auth'
 import { useSessions } from '../hooks/useSessions'
-import { usePlans } from '../hooks/usePlans'
+import { usePlans, useUpdatePlan } from '../hooks/usePlans'
 import { useReviews } from '../hooks/useReviews'
 import { format, subDays, eachDayOfInterval } from 'date-fns'
 import { PageLoading } from '../components/Loading'
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const { data: weekSessions } = useSessions(weekAgo, todayStr)
   const { data: plans } = usePlans(todayStr)
   const { data: pendingReviews } = useReviews('pending')
+  const updatePlan = useUpdatePlan()
 
   if (isLoading) return <PageLoading />
 
@@ -40,7 +41,11 @@ export default function Dashboard() {
           <h1 className="text-4xl font-headline font-extrabold tracking-tight text-on-surface">
             {getGreeting()}, {user?.name?.split(' ')[0]}.
           </h1>
-          <p className="text-on-surface-variant text-sm mt-1">Seu índice de foco está 12% maior que na semana passada.</p>
+          <p className="text-on-surface-variant text-sm mt-1">
+            {weekSessions?.length
+              ? `${weekSessions.length} sessões registradas nos últimos 7 dias.`
+              : 'Comece uma sessão para ver seu progresso aqui.'}
+          </p>
         </div>
         <div className="flex items-center gap-4">
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
@@ -102,7 +107,7 @@ export default function Dashboard() {
               <div key={plan.id} className="flex items-start gap-4 p-4 rounded-xl group hover:bg-surface-container-high transition-colors">
                 <div className="mt-1">
                   <button
-                    onClick={() => {}}
+                    onClick={() => updatePlan.mutate({ id: plan.id, updates: { status: plan.status === 'done' ? 'pending' : 'done' } })}
                     className="w-5 h-5 rounded border border-outline-variant bg-transparent text-primary focus:ring-primary/20 flex items-center justify-center"
                   >
                     {plan.status === 'done' && <span className="material-symbols-outlined text-sm">check</span>}

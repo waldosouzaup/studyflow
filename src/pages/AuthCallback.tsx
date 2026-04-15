@@ -34,12 +34,12 @@ export default function AuthCallback() {
   }, [navigate, setUser])
 
   return (
-    <div className="min-h-screen bg-surface-light dark:bg-surface-dark flex flex-col items-center justify-center p-12">
+    <div className="min-h-screen bg-surface-dim flex flex-col items-center justify-center p-12">
       <div className="w-full max-w-sm flex flex-col items-center">
         <PageLoading />
         <div className="mt-8 text-center space-y-2 opacity-50">
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-text-primary">Validando Credenciais</p>
-          <p className="text-[8px] font-mono text-text-tertiary uppercase tracking-widest leading-relaxed">Protocolo de Segurança Ativo</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface">Validando Credenciais</p>
+          <p className="text-[8px] font-mono text-outline uppercase tracking-widest leading-relaxed">Protocolo de Segurança Ativo</p>
         </div>
       </div>
     </div>
