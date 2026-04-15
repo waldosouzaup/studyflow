@@ -25,7 +25,7 @@ export const subjectApi = {
   list: async (userId: string) => {
     const { data, error } = await supabase
       .from('subjects')
-      .select('*')
+      .select('id, user_id, name, color, weekly_goal_hours, monthly_goal_hours, created_at')
       .eq('user_id', userId)
       .is('deleted_at', null)
       .order('name')
@@ -82,7 +82,7 @@ export const sessionApi = {
   list: async (userId: string, from?: string, to?: string, subjectId?: string) => {
     let query = supabase
       .from('study_sessions')
-      .select('*, subject:subjects(name, color)')
+      .select('id, user_id, subject_id, date, started_at, finished_at, paused_at, duration_minutes, topic, notes, difficulty, focus, session_type, subject:subjects(name, color)')
       .eq('user_id', userId)
       .order('started_at', { ascending: false })
 
@@ -144,7 +144,7 @@ export const sessionApi = {
   getActive: async (userId: string) => {
     const { data, error } = await supabase
       .from('study_sessions')
-      .select('*, subject:subjects(name, color)')
+      .select('id, user_id, subject_id, date, started_at, finished_at, paused_at, duration_minutes, topic, notes, difficulty, focus, session_type, subject:subjects(name, color)')
       .eq('user_id', userId)
       .is('finished_at', null)
       .order('started_at', { ascending: false })
@@ -159,7 +159,7 @@ export const planApi = {
   list: async (userId: string, date?: string) => {
     let query = supabase
       .from('plans')
-      .select('*, subject:subjects(name, color)')
+      .select('id, user_id, subject_id, planned_date, task, estimated_minutes, priority, status, is_overdue, created_at, subject:subjects(name, color)')
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
 
@@ -220,7 +220,7 @@ export const reviewApi = {
   list: async (userId: string, status?: string) => {
     let query = supabase
       .from('reviews')
-      .select('*, subject:subjects(name, color)')
+      .select('id, user_id, subject_id, session_id, topic, review_date, status, created_at, subject:subjects(name, color)')
       .eq('user_id', userId)
       .order('review_date', { ascending: true })
 
@@ -270,7 +270,7 @@ export const goalApi = {
   list: async (userId: string) => {
     const { data, error } = await supabase
       .from('goals')
-      .select('*, subject:subjects(name, color)')
+      .select('id, user_id, subject_id, type, target_minutes, period_start, period_end, is_active, created_at, subject:subjects(name, color)')
       .eq('user_id', userId)
       .eq('is_active', true)
       .order('type')

@@ -18,7 +18,16 @@ import Goals from './pages/Goals'
 import Reset from './pages/Reset'
 import './index.css'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,      // 5 min — data is fresh, no refetch
+      gcTime: 10 * 60 * 1000,         // 10 min — keep in cache
+      refetchOnWindowFocus: false,     // Don't refetch on tab focus
+      retry: 1,                        // Only retry once on failure
+    },
+  },
+})
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -28,35 +37,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // Ensure the auth user exists in public.users (required for FK constraints)
 async function ensurePublicUser(authUser: any) {
   try {
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('id', authUser.id)
-      .maybeSingle()
-
-    if (!existingUser) {
-      const { error: insertError } = await supabase.from('users').insert({
-        id: authUser.id,
-        email: authUser.email || '',
-        name: authUser.user_metadata?.name || authUser.email || '',
-        avatar_url: authUser.user_metadata?.avatar_url || null,
-        google_id: authUser.user_metadata?.provider_id || authUser.id,
-        updated_at: new Date().toISOString(),
-      })
-      if (insertError) {
-        console.warn('Failed to insert public user:', insertError)
-      }
-    } else {
-      const { error: updateError } = await supabase.from('users').update({
-        email: authUser.email || '',
-        name: authUser.user_metadata?.name || authUser.email || '',
-        avatar_url: authUser.user_metadata?.avatar_url || null,
-        updated_at: new Date().toISOString(),
-      }).eq('id', authUser.id)
-      
-      if (updateError) {
-        console.info('Could not update user profile (might be restricted by RLS):', updateError)
-      }
+    // Single upsert instead of SELECT + INSERT/UPDATE
+    const { error } = await supabase.from('users').upsert({
+      id: authUser.id,
+      email: authUser.email || '',
+      name: authUser.user_metadata?.name || authUser.email || '',
+      avatar_url: authUser.user_metadata?.avatar_url || null,
+      google_id: authUser.user_metadata?.provider_id || authUser.id,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' })
+    
+    if (error) {
+      console.info('Could not sync public user (might be restricted by RLS):', error)
     }
   } catch (e) {
     console.warn('Failed to sync public user:', e)
