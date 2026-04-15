@@ -21,6 +21,7 @@ export function useCreateSession() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', userId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard', userId] })
+      queryClient.invalidateQueries({ queryKey: ['activeSession', userId] })
     },
   })
 }

@@ -272,23 +272,23 @@ export default function Timer() {
           <div className="flex items-center gap-8 animate-scaleIn">
             <button
               onClick={pauseSession}
-              disabled={isLoading}
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all active:scale-90 border border-outline-variant/10"
+              disabled={isLoading || !activeSession}
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all active:scale-90 border border-outline-variant/10 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-2xl">pause</span>
             </button>
             <button
               onClick={finishSession}
-              disabled={isLoading}
-              className="w-24 h-24 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all active:scale-95"
+              disabled={isLoading || !activeSession}
+              className="w-24 h-24 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-5xl">stop</span>
             </button>
             {sessionState === 'paused' && (
               <button
                 onClick={resumeSession}
-                disabled={isLoading}
-                className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-primary/10 transition-all active:scale-90 border border-primary/20"
+                disabled={isLoading || !activeSession}
+                className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-primary/10 transition-all active:scale-90 border border-primary/20 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-2xl">play_arrow</span>
               </button>
