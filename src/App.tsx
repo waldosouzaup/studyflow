@@ -71,7 +71,8 @@ function buildUser(authUser: any, createdAt: string, updatedAt: string) {
 
 function AuthSync({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
-  const { setUser, logout } = useAuthStore()
+  const setUser = useAuthStore((s) => s.setUser)
+  const logout = useAuthStore((s) => s.logout)
 
   useEffect(() => {
     let mounted = true
@@ -83,13 +84,14 @@ function AuthSync({ children }: { children: React.ReactNode }) {
           supabase.auth.signOut().catch(() => {})
           logout()
         } else {
-          await ensurePublicUser(session.user)
           const user = buildUser(
             session.user,
             session.user.created_at || new Date().toISOString(),
             session.user.updated_at || new Date().toISOString()
           )
           setUser(user, session.access_token)
+          // Non-blocking: sync public user in background
+          ensurePublicUser(session.user).catch(() => {})
         }
       } catch (err) {
         console.error('Initialization auth error:', err)
@@ -99,10 +101,17 @@ function AuthSync({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Safety timeout: always load the app even if Supabase is slow
+    const safetyTimer = setTimeout(() => {
+      if (mounted && !ready) {
+        console.warn('[AuthSync] Timeout — loading app without auth confirmation')
+        setReady(true)
+      }
+    }, 5000)
+
     initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Note: INITIAL_SESSION is handled explicitly by initAuth above
       if (event === 'INITIAL_SESSION') return
 
       if (event === 'SIGNED_OUT' || !session?.user) {
@@ -112,7 +121,7 @@ function AuthSync({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'SIGNED_IN') {
-         await ensurePublicUser(session.user)
+         ensurePublicUser(session.user).catch(() => {})
       }
 
       const user = buildUser(
@@ -125,9 +134,11 @@ function AuthSync({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false
+      clearTimeout(safetyTimer)
       subscription.unsubscribe()
     }
-  }, [setUser, logout])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (!ready) return <PageLoading />
   return <>{children}</>
