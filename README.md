@@ -14,7 +14,7 @@
 
 **StudyFlow** é uma aplicação web progressiva completa para gestão de estudos, desenvolvida com foco em produtividade e metodologia científica comprovada.
 
-[Acessar Demo](https://studyflow.netlify.app) · [Reportar Bug](https://github.com/waldosouzaup/studyflow/issues) · [Contribuir](#contribuição)
+[Acessar Demo]([https://fluxodeestudo.netlify.app/]) · [Reportar Bug](https://github.com/waldosouzaup/studyflow/issues) · [Contribuir](#contribuição)
 
 </div>
 
