@@ -273,7 +273,7 @@ O deploy no Netlify é simplificado através da integração com o GitHub. O pri
 
 Após a importação, é necessário configurar as variáveis de ambiente no painel do Netlify em Site settings > Environment Variables. Adicione todas as variáveis definidas no arquivo .env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, e VITE_APP_URL (que deve ser alterada para a URL do site no Netlify).
 
-O deploy é automático: a cada push para a branch master, o Netlify automaticamente constrói e implanta a nova versão. A URL final da aplicação será algo como https://studyflow.netlify.app, tergantung do nome escolhido durante a configuração.
+O deploy é automático: a cada push para a branch master, o Netlify automaticamente constrói e implanta a nova versão. A URL final da aplicação será algo como [https://studyflow.netlify.app](https://fluxodeestudo.netlify.app/), tergantung do nome escolhido durante a configuração.
 
 ### Configurações Adicionais do Netlify
 
@@ -301,7 +301,7 @@ Este projeto está sob a licença MIT. Isso significa que você pode usar, copia
 
 Desenvolvido com ❤️ usando React, TypeScript e Supabase
 
-**Autor**: Waldo Souza  
+**Autor**: Waldo Eller  
 **GitHub**: [waldosouzaup](https://github.com/waldosouzaup)
 
 </div>
