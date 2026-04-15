@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject } from '../hooks/useSubjects'
 import { PageLoading, ErrorMessage } from '../components/Loading'
+import { useAuthStore } from '../store/auth'
 import type { Subject } from '../types/database'
 
 const COLORS = [
@@ -9,6 +10,7 @@ const COLORS = [
 ]
 
 export default function Subjects() {
+  const user = useAuthStore((s) => s.user)
   const { data: subjects, isLoading, error } = useSubjects()
   const createSubject = useCreateSubject()
   const updateSubject = useUpdateSubject()
@@ -31,7 +33,7 @@ export default function Subjects() {
     }
 
     const data = {
-      userId: '',
+      userId: user?.id || '',
       name: formData.name,
       color: formData.color,
       weeklyGoalHours: formData.weeklyGoalHours ? parseFloat(formData.weeklyGoalHours) : null,
