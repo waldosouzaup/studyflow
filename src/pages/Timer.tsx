@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { useSubjects } from '../hooks/useSubjects'
 import { useCreateSession, useActiveSession, useUpdateSession } from '../hooks/useSessions'
 import { useCreateReview } from '../hooks/useReviews'
@@ -71,11 +72,14 @@ export default function Timer() {
   const startSession = async () => {
     if (!selectedSubject || !userId) return
     const now = new Date().toISOString()
+    const sessionId = uuidv4()
+    
     setStartedAt(now)
     setElapsedSeconds(0)
     totalPausedTime.current = 0
     
     const sessionData = {
+      id: sessionId,
       user_id: userId,
       subject_id: selectedSubject,
       date: now.split('T')[0],
@@ -92,11 +96,22 @@ export default function Timer() {
     }
     
     try {
+      console.log(`[Timer] Inicando sessão ${sessionType}:`, sessionData)
       await createSession.mutateAsync(sessionData)
       setSessionState('active')
-    } catch (err) {
-      await saveOfflineSession(sessionData)
-      setSessionState('active')
+    } catch (err: any) {
+      console.error('[Timer] Falha ao criar sessão no servidor:', err)
+      // Se falhar no servidor, tentamos salvar localmente
+      try {
+        await saveOfflineSession(sessionData)
+        setSessionState('active')
+        console.log('[Timer] Sessão salva em modo offline com ID:', sessionId)
+      } catch (offlineErr) {
+        console.error('[Timer] Falha crítica: não foi possível salvar nem offline:', offlineErr)
+        alert('Erro ao iniciar sessão. Verifique sua conexão.')
+        // Resetamos o estado pois não conseguimos iniciar de nenhuma forma
+        setStartedAt(null)
+      }
     }
   }
 

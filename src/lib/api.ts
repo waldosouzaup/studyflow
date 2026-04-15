@@ -99,6 +99,7 @@ export const sessionApi = {
     const { data, error } = await supabase
       .from('study_sessions')
       .insert({
+        id: session.id,
         user_id: session.userId || session.user_id,
         subject_id: session.subjectId !== undefined ? session.subjectId : session.subject_id,
         date: session.date,
