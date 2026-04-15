@@ -6,7 +6,10 @@ import { format, subDays, eachDayOfInterval } from 'date-fns'
 import { PageLoading } from '../components/Loading'
 import clsx from 'clsx'
 
+import { useNavigate } from 'react-router-dom'
+
 export default function Dashboard() {
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const todayStr = format(new Date(), 'yyyy-MM-dd')
   const weekAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd')
@@ -18,8 +21,8 @@ export default function Dashboard() {
 
   if (isLoading) return <PageLoading />
 
-  const todayMinutes = sessions?.reduce((sum, s) => sum + s.durationMinutes, 0) || 0
-  const weekMinutes = weekSessions?.reduce((sum, s) => sum + s.durationMinutes, 0) || 0
+  const todayMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
+  const weekMinutes = weekSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
   const todayPlansDone = plans?.filter((p) => p.status === 'done').length || 0
 
   const getGreeting = () => {
@@ -43,7 +46,7 @@ export default function Dashboard() {
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
             <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
           </button>
-          <button className="flow-gradient text-on-primary font-headline font-bold px-6 py-3 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
+          <button onClick={() => navigate('/timer')} className="flow-gradient text-on-primary font-headline font-bold px-6 py-3 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined">play_arrow</span>
               Iniciar Sessão
@@ -115,7 +118,7 @@ export default function Dashboard() {
                       {plan.priority === 'high' ? 'Alta' : plan.priority === 'medium' ? 'Média' : 'Baixa'}
                     </span>
                   </div>
-                  {plan.subjectId && (
+                  {plan.subject_id && (
                     <p className="text-xs text-outline mt-1">Assunto vinculado</p>
                   )}
                 </div>
@@ -125,7 +128,7 @@ export default function Dashboard() {
               <div className="text-center py-8 text-outline">Nenhuma tarefa para hoje</div>
             )}
           </div>
-          <button className="w-full mt-6 py-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-xl transition-colors border border-dashed border-outline-variant/30">
+          <button onClick={() => navigate('/plans')} className="w-full mt-6 py-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-xl transition-colors border border-dashed border-outline-variant/30">
             + Adicionar Tarefa
           </button>
         </section>
@@ -148,7 +151,7 @@ export default function Dashboard() {
             <div className="h-40 flex items-end justify-between px-2 gap-4">
               {eachDayOfInterval({ start: subDays(new Date(), 6), end: new Date() }).map((day, i) => {
                 const dayStr = format(day, 'yyyy-MM-dd')
-                const dMinutes = weekSessions?.filter((s) => s.date.split('T')[0] === dayStr).reduce((sum, s) => sum + s.durationMinutes, 0) || 0
+                const dMinutes = weekSessions?.filter((s) => s.date.split('T')[0] === dayStr).reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
                 const maxMinutes = 240
                 const heightPct = Math.min((dMinutes / maxMinutes) * 100, 100)
                 const isToday = i === 6
@@ -183,11 +186,13 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h4 className="font-medium text-sm">{session.topic || 'Sessão de Foco'}</h4>
-                      <p className="text-xs text-outline">{format(new Date(session.startedAt), "d MMM, HH:mm")} • {session.sessionType || 'Trabalho Profundo'}</p>
+                      <p className="text-xs text-outline">
+                        {session.started_at ? format(new Date(session.started_at), "d MMM, HH:mm") : ''} • {session.session_type || 'Trabalho Profundo'}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{Math.floor(session.durationMinutes / 60)}h {session.durationMinutes % 60}m</p>
+                    <p className="text-sm font-bold">{Math.floor((session.duration_minutes || 0) / 60)}h {(session.duration_minutes || 0) % 60}m</p>
                   </div>
                 </div>
               ))}

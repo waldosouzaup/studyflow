@@ -32,19 +32,25 @@ export default function Subjects() {
       return
     }
 
-    const data = {
-      userId: user?.id || '',
-      name: formData.name,
-      color: formData.color,
-      weeklyGoalHours: formData.weeklyGoalHours ? parseFloat(formData.weeklyGoalHours) : null,
-      monthlyGoalHours: formData.monthlyGoalHours ? parseFloat(formData.monthlyGoalHours) : null,
-    }
-
     try {
       if (editingSubject) {
-        await updateSubject.mutateAsync({ id: editingSubject.id, updates: data })
+        await updateSubject.mutateAsync({
+          id: editingSubject.id,
+          updates: {
+            name: formData.name,
+            color: formData.color,
+            weekly_goal_hours: formData.weeklyGoalHours ? parseFloat(formData.weeklyGoalHours) : null,
+            monthly_goal_hours: formData.monthlyGoalHours ? parseFloat(formData.monthlyGoalHours) : null,
+          },
+        })
       } else {
-        await createSubject.mutateAsync(data as any)
+        await createSubject.mutateAsync({
+          user_id: user?.id || '',
+          name: formData.name,
+          color: formData.color,
+          weekly_goal_hours: formData.weeklyGoalHours ? parseFloat(formData.weeklyGoalHours) : null,
+          monthly_goal_hours: formData.monthlyGoalHours ? parseFloat(formData.monthlyGoalHours) : null,
+        })
       }
       setShowForm(false)
       setEditingSubject(null)
@@ -59,8 +65,8 @@ export default function Subjects() {
     setFormData({
       name: subject.name,
       color: subject.color,
-      weeklyGoalHours: subject.weeklyGoalHours?.toString() || '',
-      monthlyGoalHours: subject.monthlyGoalHours?.toString() || '',
+      weeklyGoalHours: subject.weekly_goal_hours?.toString() || '',
+      monthlyGoalHours: subject.monthly_goal_hours?.toString() || '',
     })
     setShowForm(true)
   }
@@ -228,10 +234,10 @@ export default function Subjects() {
                   <div className="space-y-1">
                     <span className="text-[10px] font-label uppercase tracking-widest text-outline">Compromisso Semanal</span>
                     <p className="text-lg font-headline font-bold text-on-surface">
-                      {subject.weeklyGoalHours || 0} <span className="text-sm font-normal text-outline">/ {subject.weeklyGoalHours || 12}h</span>
+                      {subject.weekly_goal_hours || 0} <span className="text-sm font-normal text-outline">/ {subject.weekly_goal_hours || 12}h</span>
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-primary">{subject.weeklyGoalHours ? 70 : 0}%</span>
+                  <span className="text-sm font-bold text-primary">{subject.weekly_goal_hours ? 70 : 0}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
                   <div className="h-full flow-gradient relative" style={{ width: '70%' }}></div>

@@ -15,9 +15,9 @@ export default function Plans() {
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null)
   const [formData, setFormData] = useState({
     task: '',
-    subjectId: '',
-    plannedDate: new Date().toISOString().split('T')[0],
-    estimatedMinutes: '',
+    subject_id: '',
+    planned_date: new Date().toISOString().split('T')[0],
+    estimated_minutes: '',
     priority: 'medium' as 'high' | 'medium' | 'low',
   })
 
@@ -42,22 +42,22 @@ export default function Plans() {
           id: editingPlan.id,
           updates: {
             task: formData.task,
-            subjectId: formData.subjectId || null,
-            plannedDate: formData.plannedDate,
-            estimatedMinutes: formData.estimatedMinutes ? parseInt(formData.estimatedMinutes) : null,
+            subject_id: formData.subject_id || null,
+            planned_date: formData.planned_date,
+            estimated_minutes: formData.estimated_minutes ? parseInt(formData.estimated_minutes) : null,
             priority: formData.priority,
           },
         })
       } else {
         await createPlan.mutateAsync({
-          userId,
-          subjectId: formData.subjectId || null,
-          plannedDate: formData.plannedDate,
+          user_id: userId,
+          subject_id: formData.subject_id || null,
+          planned_date: formData.planned_date,
           task: formData.task,
-          estimatedMinutes: formData.estimatedMinutes ? parseInt(formData.estimatedMinutes) : null,
+          estimated_minutes: formData.estimated_minutes ? parseInt(formData.estimated_minutes) : null,
           priority: formData.priority,
           status: 'pending',
-          isOverdue: false,
+          is_overdue: false,
         })
       }
       resetForm()
@@ -70,9 +70,9 @@ export default function Plans() {
     setEditingPlan(plan)
     setFormData({
       task: plan.task,
-      subjectId: plan.subjectId || '',
-      plannedDate: plan.plannedDate.split('T')[0],
-      estimatedMinutes: plan.estimatedMinutes?.toString() || '',
+      subject_id: plan.subject_id || '',
+      planned_date: plan.planned_date.split('T')[0],
+      estimated_minutes: plan.estimated_minutes?.toString() || '',
       priority: plan.priority,
     })
     setShowForm(true)
@@ -89,16 +89,16 @@ export default function Plans() {
     setEditingPlan(null)
     setFormData({
       task: '',
-      subjectId: '',
-      plannedDate: new Date().toISOString().split('T')[0],
-      estimatedMinutes: '',
+      subject_id: '',
+      planned_date: new Date().toISOString().split('T')[0],
+      estimated_minutes: '',
       priority: 'medium',
     })
   }
 
   const getPlansForDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd')
-    return plans?.filter((p) => p.plannedDate.split('T')[0] === dateStr) || []
+    return plans?.filter((p) => p.planned_date.split('T')[0] === dateStr) || []
   }
 
   if (isLoading) return <PageLoading />
@@ -175,16 +175,16 @@ export default function Plans() {
                     <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Data</label>
                     <input
                       type="date"
-                      value={formData.plannedDate}
-                      onChange={(e) => setFormData({ ...formData, plannedDate: e.target.value })}
+                      value={formData.planned_date}
+                      onChange={(e) => setFormData({ ...formData, planned_date: e.target.value })}
                       className="input w-full"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Assunto</label>
                     <select
-                      value={formData.subjectId}
-                      onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
+                      value={formData.subject_id}
+                      onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
                       className="input w-full"
                     >
                       <option value="">Nenhum</option>
@@ -200,8 +200,8 @@ export default function Plans() {
                     <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Tempo (min)</label>
                     <input
                       type="number"
-                      value={formData.estimatedMinutes}
-                      onChange={(e) => setFormData({ ...formData, estimatedMinutes: e.target.value })}
+                      value={formData.estimated_minutes}
+                      onChange={(e) => setFormData({ ...formData, estimated_minutes: e.target.value })}
                       className="input w-full"
                       placeholder="30"
                     />
@@ -274,11 +274,11 @@ export default function Plans() {
                     <span className={clsx('font-medium', plan.status === 'done' ? 'line-through text-outline' : '')}>
                       {plan.task}
                     </span>
-                    {plan.subjectId && (
+                    {plan.subject_id && (
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjects?.find(s => s.id === plan.subjectId)?.color }} />
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjects?.find(s => s.id === plan.subject_id)?.color }} />
                         <span className="text-[10px] font-label text-outline uppercase">
-                          {subjects?.find((s) => s.id === plan.subjectId)?.name}
+                          {subjects?.find((s) => s.id === plan.subject_id)?.name}
                         </span>
                       </div>
                     )}

@@ -54,11 +54,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-outline-variant/10 space-y-1">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
+          <button onClick={() => alert('Página de Configurações em breve.')} className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
             <span className="material-symbols-outlined text-[20px]">settings</span>
             <span>Configurações</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
+          <button onClick={() => alert('Central de Ajuda em breve.')} className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low/50 rounded-lg transition-all duration-200">
             <span className="material-symbols-outlined text-[20px]">help_outline</span>
             <span>Ajuda</span>
           </button>
@@ -81,14 +81,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <button onClick={toggleTheme} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
                 <span className="material-symbols-outlined text-on-surface-variant">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
               </button>
-              <button className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+              <button onClick={() => alert('Notificações em breve.')} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
                 <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
               </button>
-              <button className="p-2 hover:bg-surface-container-high rounded-md transition-all">
+              <button onClick={() => alert('Página de Configurações em breve.')} className="p-2 hover:bg-surface-container-high rounded-md transition-all">
                 <span className="material-symbols-outlined text-on-surface-variant">settings</span>
               </button>
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-outline-variant/20 object-cover" />
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full border border-outline-variant/20 object-cover" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary text-sm font-bold">
                   {user?.name?.charAt(0) || '?'}

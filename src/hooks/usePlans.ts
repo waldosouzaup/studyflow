@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { planApi } from '../lib/api'
 import { useAuthStore } from '../store/auth'
-import type { Plan } from '../types/database'
 
 export function usePlans(date?: string) {
   const userId = useAuthStore((s) => s.user?.id)
@@ -19,7 +18,7 @@ export function useCreatePlan() {
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: (plan: Omit<Plan, 'id' | 'createdAt'>) => planApi.create(plan),
+    mutationFn: (plan: { user_id: string; subject_id: string | null; planned_date: string; task: string; estimated_minutes: number | null; priority: 'high' | 'medium' | 'low'; status: 'pending' | 'done' | 'skipped'; is_overdue: boolean }) => planApi.create(plan),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans', userId] })
     },
@@ -31,7 +30,7 @@ export function useUpdatePlan() {
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<Plan> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: { subject_id?: string | null; planned_date?: string; task?: string; estimated_minutes?: number | null; priority?: 'high' | 'medium' | 'low'; status?: 'pending' | 'done' | 'skipped'; is_overdue?: boolean } }) =>
       planApi.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans', userId] })

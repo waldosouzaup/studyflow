@@ -32,13 +32,13 @@ export default function Goals() {
     const period = getPeriod(formData.type)
     try {
       await createGoal.mutateAsync({
-        userId,
-        subjectId: formData.subjectId || null,
+        user_id: userId,
+        subject_id: formData.subjectId || null,
         type: formData.type,
-        targetMinutes: formData.targetMinutes,
-        periodStart: period.start,
-        periodEnd: period.end,
-        isActive: true,
+        target_minutes: formData.targetMinutes,
+        period_start: period.start,
+        period_end: period.end,
+        is_active: true,
       })
       setShowForm(false)
       setFormData({ subjectId: '', type: 'daily', targetMinutes: 60 })
@@ -145,7 +145,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {dailyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
               ))}
             </div>
           )}
@@ -163,7 +163,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {weeklyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
               ))}
             </div>
           )}
@@ -181,7 +181,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {monthlyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subjectId)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
               ))}
             </div>
           )}
@@ -207,14 +207,14 @@ function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name:
           </span>
         </div>
         <button
-          onClick={() => updateGoal.mutate({ id: goal.id, updates: { isActive: !goal.isActive } })}
+          onClick={() => updateGoal.mutate({ id: goal.id, updates: { is_active: !goal.is_active } })}
           className={`px-2.5 py-1 text-[9px] font-label uppercase tracking-wider rounded-md transition-all ${
-            goal.isActive 
+            goal.is_active 
               ? 'bg-primary/10 text-primary' 
               : 'bg-surface-container-highest text-outline'
           }`}
         >
-          {goal.isActive ? 'Ativo' : 'Pausado'}
+          {goal.is_active ? 'Ativo' : 'Pausado'}
         </button>
       </div>
       
@@ -222,7 +222,7 @@ function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name:
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-headline font-bold text-on-surface">0</span>
-            <span className="text-sm text-outline">/ {goal.targetMinutes}</span>
+            <span className="text-sm text-outline">/ {goal.target_minutes}</span>
             <span className="text-[9px] font-label text-outline ml-1 uppercase tracking-tight">min</span>
           </div>
           <span className="text-[10px] font-mono font-bold text-outline">0%</span>

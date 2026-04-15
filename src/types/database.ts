@@ -2,77 +2,77 @@ export interface User {
   id: string
   email: string
   name: string
-  avatarUrl: string | null
-  googleId: string
-  streakCount: number
-  streakLastDate: string | null
-  createdAt: string
-  updatedAt: string
+  avatar_url: string | null
+  google_id: string
+  streak_count: number
+  streak_last_date: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface Subject {
   id: string
-  userId: string
+  user_id: string
   name: string
   color: string
-  weeklyGoalHours: number | null
-  monthlyGoalHours: number | null
-  deletedAt: string | null
-  createdAt: string
+  weekly_goal_hours: number | null
+  monthly_goal_hours: number | null
+  deleted_at: string | null
+  created_at: string
 }
 
 export interface StudySession {
   id: string
-  userId: string
-  subjectId: string
+  user_id: string
+  subject_id: string
   date: string
-  startedAt: string
-  finishedAt: string | null
-  pausedAt: string | null
-  durationMinutes: number
+  started_at: string
+  finished_at: string | null
+  paused_at: string | null
+  duration_minutes: number
   topic: string | null
   notes: string | null
   difficulty: number | null
   focus: number | null
-  sessionType: 'free' | 'pomodoro'
-  isOfflineSync: boolean
-  createdAt: string
+  session_type: 'free' | 'pomodoro'
+  is_offline_sync: boolean
+  created_at: string
 }
 
 export interface Plan {
   id: string
-  userId: string
-  subjectId: string | null
-  plannedDate: string
+  user_id: string
+  subject_id: string | null
+  planned_date: string
   task: string
-  estimatedMinutes: number | null
+  estimated_minutes: number | null
   priority: 'high' | 'medium' | 'low'
   status: 'pending' | 'done' | 'skipped'
-  isOverdue: boolean
-  createdAt: string
+  is_overdue: boolean
+  created_at: string
 }
 
 export interface Review {
   id: string
-  userId: string
-  subjectId: string
-  sessionId: string | null
+  user_id: string
+  subject_id: string
+  session_id: string | null
   topic: string
-  reviewDate: string
+  review_date: string
   status: 'pending' | 'done' | 'skipped'
-  createdAt: string
+  created_at: string
 }
 
 export interface Goal {
   id: string
-  userId: string
-  subjectId: string | null
+  user_id: string
+  subject_id: string | null
   type: 'daily' | 'weekly' | 'monthly'
-  targetMinutes: number
-  periodStart: string
-  periodEnd: string
-  isActive: boolean
-  createdAt: string
+  target_minutes: number
+  period_start: string
+  period_end: string
+  is_active: boolean
+  created_at: string
 }
 
 export interface SubjectWithName {

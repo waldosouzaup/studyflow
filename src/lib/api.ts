@@ -38,11 +38,11 @@ export const subjectApi = {
     const { data, error } = await supabase
       .from('subjects')
       .insert({
-        user_id: subject.userId,
+        user_id: subject.userId || subject.user_id,
         name: subject.name,
         color: subject.color,
-        weekly_goal_hours: subject.weeklyGoalHours,
-        monthly_goal_hours: subject.monthlyGoalHours,
+        weekly_goal_hours: subject.weeklyGoalHours !== undefined ? subject.weeklyGoalHours : subject.weekly_goal_hours,
+        monthly_goal_hours: subject.monthlyGoalHours !== undefined ? subject.monthlyGoalHours : subject.monthly_goal_hours,
       })
       .select()
       .single()
@@ -57,8 +57,8 @@ export const subjectApi = {
       .update({
         name: updates.name,
         color: updates.color,
-        weekly_goal_hours: updates.weeklyGoalHours,
-        monthly_goal_hours: updates.monthlyGoalHours,
+        weekly_goal_hours: updates.weeklyGoalHours !== undefined ? updates.weeklyGoalHours : updates.weekly_goal_hours,
+        monthly_goal_hours: updates.monthlyGoalHours !== undefined ? updates.monthlyGoalHours : updates.monthly_goal_hours,
       })
       .eq('id', id)
       .select()
@@ -99,19 +99,19 @@ export const sessionApi = {
     const { data, error } = await supabase
       .from('study_sessions')
       .insert({
-        user_id: session.userId,
-        subject_id: session.subjectId,
+        user_id: session.userId || session.user_id,
+        subject_id: session.subjectId !== undefined ? session.subjectId : session.subject_id,
         date: session.date,
-        started_at: session.startedAt,
-        finished_at: session.finishedAt,
-        paused_at: session.pausedAt,
-        duration_minutes: session.durationMinutes,
+        started_at: session.startedAt || session.started_at,
+        finished_at: session.finishedAt !== undefined ? session.finishedAt : session.finished_at,
+        paused_at: session.pausedAt !== undefined ? session.pausedAt : session.paused_at,
+        duration_minutes: session.durationMinutes !== undefined ? session.durationMinutes : session.duration_minutes,
         topic: session.topic,
         notes: session.notes,
         difficulty: session.difficulty,
         focus: session.focus,
-        session_type: session.sessionType,
-        is_offline_sync: session.isOfflineSync,
+        session_type: session.sessionType || session.session_type,
+        is_offline_sync: session.isOfflineSync !== undefined ? session.isOfflineSync : session.is_offline_sync,
       })
       .select()
       .single()
@@ -124,9 +124,9 @@ export const sessionApi = {
     const { data, error } = await supabase
       .from('study_sessions')
       .update({
-        finished_at: updates.finishedAt,
-        paused_at: updates.pausedAt,
-        duration_minutes: updates.durationMinutes,
+        finished_at: updates.finishedAt !== undefined ? updates.finishedAt : updates.finished_at,
+        paused_at: updates.pausedAt !== undefined ? updates.pausedAt : updates.paused_at,
+        duration_minutes: updates.durationMinutes !== undefined ? updates.durationMinutes : updates.duration_minutes,
         topic: updates.topic,
         notes: updates.notes,
         difficulty: updates.difficulty,
@@ -173,14 +173,14 @@ export const planApi = {
     const { data, error } = await supabase
       .from('plans')
       .insert({
-        user_id: plan.userId,
-        subject_id: plan.subjectId,
-        planned_date: plan.plannedDate,
+        user_id: plan.userId || plan.user_id,
+        subject_id: plan.subjectId !== undefined ? plan.subjectId : plan.subject_id,
+        planned_date: plan.plannedDate || plan.planned_date,
         task: plan.task,
-        estimated_minutes: plan.estimatedMinutes,
+        estimated_minutes: plan.estimatedMinutes !== undefined ? plan.estimatedMinutes : plan.estimated_minutes,
         priority: plan.priority,
         status: plan.status,
-        is_overdue: plan.isOverdue,
+        is_overdue: plan.isOverdue !== undefined ? plan.isOverdue : plan.is_overdue,
       })
       .select()
       .single()
@@ -194,12 +194,12 @@ export const planApi = {
       .from('plans')
       .update({
         task: updates.task,
-        subject_id: updates.subjectId,
-        planned_date: updates.plannedDate,
-        estimated_minutes: updates.estimatedMinutes,
+        subject_id: updates.subjectId !== undefined ? updates.subjectId : updates.subject_id,
+        planned_date: updates.plannedDate || updates.planned_date,
+        estimated_minutes: updates.estimatedMinutes !== undefined ? updates.estimatedMinutes : updates.estimated_minutes,
         priority: updates.priority,
         status: updates.status,
-        is_overdue: updates.isOverdue,
+        is_overdue: updates.isOverdue !== undefined ? updates.isOverdue : updates.is_overdue,
       })
       .eq('id', id)
       .select()
@@ -234,11 +234,11 @@ export const reviewApi = {
     const { data, error } = await supabase
       .from('reviews')
       .insert({
-        user_id: review.userId,
-        subject_id: review.subjectId,
-        session_id: review.sessionId,
+        user_id: review.userId || review.user_id,
+        subject_id: review.subjectId || review.subject_id,
+        session_id: review.sessionId !== undefined ? review.sessionId : review.session_id,
         topic: review.topic,
-        review_date: review.reviewDate,
+        review_date: review.reviewDate || review.review_date,
         status: review.status,
       })
       .select()
@@ -253,7 +253,7 @@ export const reviewApi = {
       .from('reviews')
       .update({
         topic: updates.topic,
-        review_date: updates.reviewDate,
+        review_date: updates.reviewDate || updates.review_date,
         status: updates.status,
       })
       .eq('id', id)
@@ -282,13 +282,13 @@ export const goalApi = {
     const { data, error } = await supabase
       .from('goals')
       .insert({
-        user_id: goal.userId,
-        subject_id: goal.subjectId,
+        user_id: goal.userId || goal.user_id,
+        subject_id: goal.subjectId !== undefined ? goal.subjectId : goal.subject_id,
         type: goal.type,
-        target_minutes: goal.targetMinutes,
-        period_start: goal.periodStart,
-        period_end: goal.periodEnd,
-        is_active: goal.isActive,
+        target_minutes: goal.targetMinutes !== undefined ? goal.targetMinutes : goal.target_minutes,
+        period_start: goal.periodStart || goal.period_start,
+        period_end: goal.periodEnd || goal.period_end,
+        is_active: goal.isActive !== undefined ? goal.isActive : goal.is_active,
       })
       .select()
       .single()
@@ -301,12 +301,12 @@ export const goalApi = {
     const { data, error } = await supabase
       .from('goals')
       .update({
-        subject_id: updates.subjectId,
+        subject_id: updates.subjectId !== undefined ? updates.subjectId : updates.subject_id,
         type: updates.type,
-        target_minutes: updates.targetMinutes,
-        period_start: updates.periodStart,
-        period_end: updates.periodEnd,
-        is_active: updates.isActive,
+        target_minutes: updates.targetMinutes !== undefined ? updates.targetMinutes : updates.target_minutes,
+        period_start: updates.periodStart || updates.period_start,
+        period_end: updates.periodEnd || updates.period_end,
+        is_active: updates.isActive !== undefined ? updates.isActive : updates.is_active,
       })
       .eq('id', id)
       .select()

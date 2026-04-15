@@ -17,7 +17,7 @@ export function useCreateSubject() {
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: (subject: Omit<import('../types/database').Subject, 'id' | 'createdAt' | 'deletedAt'>) =>
+    mutationFn: (subject: { user_id: string; name: string; color: string; weekly_goal_hours: number | null; monthly_goal_hours: number | null }) =>
       subjectApi.create(subject),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects', userId] })
@@ -30,7 +30,7 @@ export function useUpdateSubject() {
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<import('../types/database').Subject> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: { name: string; color: string; weekly_goal_hours: number | null; monthly_goal_hours: number | null } }) =>
       subjectApi.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects', userId] })

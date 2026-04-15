@@ -15,13 +15,13 @@ export default function AuthCallback() {
         const user = {
           id: session.user.id,
           email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || '',
-          avatarUrl: session.user.user_metadata?.avatar_url || null,
-          googleId: session.user.user_metadata?.provider_id || '',
-          streakCount: 0,
-          streakLastDate: null,
-          createdAt: session.user.created_at || new Date().toISOString(),
-          updatedAt: session.user.updated_at || new Date().toISOString(),
+          name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || '',
+          avatar_url: session.user.user_metadata?.avatar_url || null,
+          google_id: session.user.user_metadata?.provider_id || '',
+          streak_count: 0,
+          streak_last_date: null,
+          created_at: session.user.created_at || new Date().toISOString(),
+          updated_at: session.user.updated_at || new Date().toISOString(),
         }
         setUser(user, session.access_token)
         navigate('/')

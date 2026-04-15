@@ -30,13 +30,13 @@ export default function Timer() {
   const totalPausedTime = useRef(0)
 
   useEffect(() => {
-    if (activeSession && !activeSession.finishedAt) {
-      setSessionState(activeSession.pausedAt ? 'paused' : 'active')
-      setSelectedSubject(activeSession.subjectId)
-      setStartedAt(activeSession.startedAt)
-      const startTime = new Date(activeSession.startedAt).getTime()
-      const pausedDuration = activeSession.pausedAt
-        ? new Date(activeSession.pausedAt).getTime() - startTime
+    if (activeSession && !activeSession.finished_at) {
+      setSessionState(activeSession.paused_at ? 'paused' : 'active')
+      setSelectedSubject(activeSession.subject_id)
+      setStartedAt(activeSession.started_at)
+      const startTime = new Date(activeSession.started_at).getTime()
+      const pausedDuration = activeSession.paused_at
+        ? new Date(activeSession.paused_at).getTime() - startTime
         : 0
       totalPausedTime.current = pausedDuration
       setElapsedSeconds(Math.floor((Date.now() - startTime - pausedDuration) / 1000))
@@ -76,21 +76,19 @@ export default function Timer() {
     totalPausedTime.current = 0
     
     const sessionData = {
-      id: crypto.randomUUID(),
-      userId,
-      subjectId: selectedSubject,
+      user_id: userId,
+      subject_id: selectedSubject,
       date: now.split('T')[0],
-      startedAt: now,
-      finishedAt: null,
-      pausedAt: null,
-      durationMinutes: 0,
+      started_at: now,
+      finished_at: null,
+      paused_at: null,
+      duration_minutes: 0,
       topic: null,
       notes: null,
       difficulty: null,
       focus: null,
-      sessionType,
-      isOfflineSync: false,
-      createdAt: now,
+      session_type: sessionType,
+      is_offline_sync: false,
     }
     
     try {
@@ -108,7 +106,7 @@ export default function Timer() {
     try {
       await updateSession.mutateAsync({
         id: activeSession.id,
-        updates: { pausedAt: new Date().toISOString() },
+        updates: { paused_at: new Date().toISOString() },
       })
     } catch (err) {
       console.error(err)
@@ -117,16 +115,16 @@ export default function Timer() {
 
   const resumeSession = useCallback(async () => {
     if (!activeSession || !startedAt) return
-    const pausedAt = activeSession.pausedAt
-    if (pausedAt) {
-      const pauseDuration = Date.now() - new Date(pausedAt).getTime()
+    const paused_at = activeSession.paused_at
+    if (paused_at) {
+      const pauseDuration = Date.now() - new Date(paused_at).getTime()
       totalPausedTime.current += pauseDuration
     }
     setSessionState('active')
     try {
       await updateSession.mutateAsync({
         id: activeSession.id,
-        updates: { pausedAt: null },
+        updates: { paused_at: null },
       })
     } catch (err) {
       console.error(err)
@@ -145,8 +143,8 @@ export default function Timer() {
       await updateSession.mutateAsync({
         id: activeSession.id,
         updates: {
-          finishedAt: new Date().toISOString(),
-          durationMinutes,
+          finished_at: new Date().toISOString(),
+          duration_minutes: durationMinutes,
           topic: topic || null,
           notes: notes || null,
           difficulty,
@@ -165,11 +163,11 @@ export default function Timer() {
     reviewDate.setDate(reviewDate.getDate() + intervalDays)
     try {
       await createReview.mutateAsync({
-        userId: activeSession.userId,
-        subjectId: selectedSubject,
-        sessionId: activeSession.id,
+        user_id: activeSession.user_id,
+        subject_id: selectedSubject,
+        session_id: activeSession.id,
         topic: topic || 'Revisão',
-        reviewDate: reviewDate.toISOString().split('T')[0],
+        review_date: reviewDate.toISOString().split('T')[0],
         status: 'pending',
       })
       alert('Revisão agendada!')
@@ -405,7 +403,18 @@ export default function Timer() {
         )}
       </div>
 
-      <div className="fixed bottom-10 right-10 bg-surface-container-highest/80 backdrop-blur-md p-4 rounded-full border border-outline-variant/20 group hover:bg-primary transition-all active:scale-95 z-50 cursor-pointer">
+      <div 
+        onClick={() => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen().catch(() => {});
+            }
+          }
+        }}
+        className="fixed bottom-10 right-10 bg-surface-container-highest/80 backdrop-blur-md p-4 rounded-full border border-outline-variant/20 group hover:bg-primary transition-all active:scale-95 z-50 cursor-pointer"
+      >
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined group-hover:text-on-primary">visibility_off</span>
           <span className="font-label text-xs font-bold uppercase tracking-widest hidden group-hover:block text-on-primary">Modo Zen</span>

@@ -12,6 +12,31 @@
   --color-secondary: #E9C349;
   --color-tertiary: #FFB695;
   
+  --bg-surface-lowest: #F5F5F7;
+  --bg-surface-dim: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-container-lowest: #FFFFFF;
+  --bg-surface-container-low: #F5F5F7;
+  --bg-surface-container: #EBEBEB;
+  --bg-surface-container-high: #E0E0E0;
+  --bg-surface-container-highest: #D6D6D6;
+  
+  --text-on-surface: #1D1D1F;
+  --text-on-surface-variant: #424245;
+  --text-outline: #86868B;
+  --text-outline-variant: #D2D2D7;
+  
+  --border-outline: #86868B;
+  --border-outline-variant: #E5E5EA;
+  
+  --shadow-glow: 0 0 15px rgba(0, 46, 104, 0.1);
+  --shadow-glow-secondary: 0 0 15px rgba(175, 141, 17, 0.1);
+  --shadow-glass: 0 0 0 1px rgba(0, 0, 0, 0.05);
+  
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.dark {
   --bg-surface-lowest: #0E0E0E;
   --bg-surface-dim: #131313;
   --bg-surface: #131313;
@@ -32,8 +57,6 @@
   --shadow-glow: 0 0 15px rgba(173, 199, 255, 0.2);
   --shadow-glow-secondary: 0 0 15px rgba(233, 196, 73, 0.2);
   --shadow-glass: 0 0 0 1px rgba(255, 255, 255, 0.05);
-  
-  font-family: 'Inter', system-ui, sans-serif;
 }
 
 body {

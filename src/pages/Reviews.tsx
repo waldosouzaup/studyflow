@@ -29,11 +29,11 @@ export default function Reviews() {
 
     try {
       await createReview.mutateAsync({
-        userId,
-        subjectId: formData.subjectId,
-        sessionId: null,
+        user_id: userId,
+        subject_id: formData.subjectId,
+        session_id: null,
         topic: formData.topic,
-        reviewDate: formData.reviewDate,
+        review_date: formData.reviewDate,
         status: 'pending',
       })
       setShowForm(false)
@@ -49,7 +49,7 @@ export default function Reviews() {
       newDate.setDate(newDate.getDate() + intervalDays)
       await updateReview.mutateAsync({
         id: review.id,
-        updates: { reviewDate: format(newDate, 'yyyy-MM-dd'), status: 'pending' },
+        updates: { review_date: format(newDate, 'yyyy-MM-dd'), status: 'pending' },
       })
     } else {
       await updateReview.mutateAsync({ id: review.id, updates: { status: 'done' } })
@@ -60,7 +60,7 @@ export default function Reviews() {
   if (error) return <ErrorMessage message="Falha ao carregar revisões." />
 
   const groupedReviews = reviews?.reduce((acc, review) => {
-    const dateKey = review.reviewDate.split('T')[0]
+    const dateKey = review.review_date.split('T')[0]
     if (!acc[dateKey]) acc[dateKey] = []
     acc[dateKey].push(review)
     return acc
@@ -182,9 +182,9 @@ export default function Reviews() {
                           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjects?.find(s => s.id === review.subjectId)?.color }} />
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subjects?.find(s => s.id === review.subject_id)?.color }} />
                                 <span className="text-[10px] font-label uppercase tracking-wider text-outline">
-                                  {subjects?.find((s) => s.id === review.subjectId)?.name || 'Sem vínculo'}
+                                  {subjects?.find((s) => s.id === review.subject_id)?.name || 'Sem vínculo'}
                                 </span>
                               </div>
                               <h4 className="text-base font-medium text-on-surface group-hover:text-primary transition-colors">{review.topic}</h4>
@@ -220,11 +220,11 @@ export default function Reviews() {
                   <div>
                     <h4 className="text-base font-medium text-on-surface mb-1">{review.topic}</h4>
                     <span className="text-[10px] font-mono text-outline uppercase tracking-wider">
-                      {review.reviewDate ? format(new Date(review.reviewDate), "dd MMM yyyy", { locale: ptBR }) : '---'}
+                      {review.review_date ? format(new Date(review.review_date), "dd MMM yyyy", { locale: ptBR }) : '---'}
                     </span>
                   </div>
                   <button 
-                    onClick={() => updateReview.mutate({ id: review.id, updates: { reviewDate: format(new Date(), 'yyyy-MM-dd'), status: 'pending' }})} 
+                    onClick={() => updateReview.mutate({ id: review.id, updates: { review_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending' }})} 
                     className="text-[10px] font-label uppercase tracking-wider text-outline hover:text-primary transition-colors"
                   >
                     Reprogramar

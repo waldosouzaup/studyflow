@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     avatar_url TEXT,
-    google_id VARCHAR(255) UNIQUE NOT NULL,
+    google_id VARCHAR(255),
     streak_count INTEGER DEFAULT 0,
     streak_last_date DATE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
