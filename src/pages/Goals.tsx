@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useGoals, useCreateGoal, useUpdateGoal } from '../hooks/useGoals'
 import { useSubjects } from '../hooks/useSubjects'
+import { useSessionsByDateRange } from '../hooks/useSessions'
 import { useAuthStore } from '../store/auth'
 import { PageLoading, ErrorMessage } from '../components/Loading'
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import type { Goal } from '../types/database'
 
 export default function Goals() {
@@ -20,12 +21,42 @@ export default function Goals() {
   const createGoal = useCreateGoal()
   const updateGoal = useUpdateGoal()
 
+  // Fetch session data covering all active goal periods
+  const today = new Date()
+  const monthStart = format(startOfMonth(today), 'yyyy-MM-dd')
+  const monthEnd = format(endOfMonth(today), 'yyyy-MM-dd')
+  const { data: periodSessions } = useSessionsByDateRange(monthStart, monthEnd)
+
   const getPeriod = (type: string) => {
     const now = new Date()
     if (type === 'daily') return { start: format(now, 'yyyy-MM-dd'), end: format(now, 'yyyy-MM-dd') }
     if (type === 'weekly') return { start: format(startOfWeek(now), 'yyyy-MM-dd'), end: format(endOfWeek(now), 'yyyy-MM-dd') }
     return { start: format(startOfMonth(now), 'yyyy-MM-dd'), end: format(endOfMonth(now), 'yyyy-MM-dd') }
   }
+
+  // Calculate actual minutes per goal based on sessions
+  const goalProgress = useMemo(() => {
+    if (!goals || !periodSessions) return new Map<string, number>()
+
+    const progressMap = new Map<string, number>()
+
+    goals.forEach((goal) => {
+      const periodStart = goal.period_start.split('T')[0]
+      const periodEnd = goal.period_end.split('T')[0]
+
+      const matchingSessions = periodSessions.filter((s) => {
+        const sessionDate = s.date.split('T')[0]
+        const inPeriod = sessionDate >= periodStart && sessionDate <= periodEnd
+        const matchesSubject = !goal.subject_id || s.subject_id === goal.subject_id
+        return inPeriod && matchesSubject
+      })
+
+      const totalMinutes = matchingSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0)
+      progressMap.set(goal.id, totalMinutes)
+    })
+
+    return progressMap
+  }, [goals, periodSessions])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,7 +94,7 @@ export default function Goals() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
+          className="w-full md:w-auto justify-center gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
         >
           <span className="material-symbols-outlined">add</span>
           Nova Meta
@@ -72,7 +103,7 @@ export default function Goals() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn max-h-[90vh] overflow-y-auto">
             <div className="p-8 border-b border-outline-variant/10">
               <div className="flex justify-between items-start">
                 <div>
@@ -145,7 +176,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {dailyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
               ))}
             </div>
           )}
@@ -163,7 +194,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {weeklyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
               ))}
             </div>
           )}
@@ -181,7 +212,7 @@ export default function Goals() {
           ) : (
             <div className="space-y-4">
               {monthlyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} />
+                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
               ))}
             </div>
           )}
@@ -191,7 +222,14 @@ export default function Goals() {
   )
 }
 
-function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name: string; color: string }; updateGoal: any }) {
+function GoalCard({ goal, subject, updateGoal, actualMinutes }: { goal: Goal; subject?: { name: string; color: string }; updateGoal: any; actualMinutes: number }) {
+  const progressPct = Math.min((actualMinutes / goal.target_minutes) * 100, 100)
+  const isCompleted = progressPct >= 100
+  const actualHours = Math.floor(actualMinutes / 60)
+  const actualMins = actualMinutes % 60
+  const targetHours = Math.floor(goal.target_minutes / 60)
+  const targetMins = goal.target_minutes % 60
+
   return (
     <div className="surface-card p-6 group hover:scale-[1.02] transition-all">
       <div className="flex items-start justify-between mb-4">
@@ -206,29 +244,44 @@ function GoalCard({ goal, subject, updateGoal }: { goal: Goal; subject?: { name:
             {goal.type === 'daily' ? 'Hoje' : goal.type === 'weekly' ? 'Esta semana' : 'Este mês'}
           </span>
         </div>
-        <button
-          onClick={() => updateGoal.mutate({ id: goal.id, updates: { is_active: !goal.is_active } })}
-          className={`px-2.5 py-1 text-[9px] font-label uppercase tracking-wider rounded-md transition-all ${
-            goal.is_active 
-              ? 'bg-primary/10 text-primary' 
-              : 'bg-surface-container-highest text-outline'
-          }`}
-        >
-          {goal.is_active ? 'Ativo' : 'Pausado'}
-        </button>
+        <div className="flex items-center gap-2">
+          {isCompleted && (
+            <span className="text-[9px] font-label uppercase tracking-wider px-2 py-1 rounded-md bg-secondary/10 text-secondary">
+              ✓ Concluída
+            </span>
+          )}
+          <button
+            onClick={() => updateGoal.mutate({ id: goal.id, updates: { is_active: !goal.is_active } })}
+            className={`px-2.5 py-1 text-[9px] font-label uppercase tracking-wider rounded-md transition-all ${
+              goal.is_active 
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-surface-container-highest text-outline'
+            }`}
+          >
+            {goal.is_active ? 'Ativo' : 'Pausado'}
+          </button>
+        </div>
       </div>
       
       <div className="space-y-3">
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-sm font-label text-outline uppercase tracking-wider">Progresso calculado ao final de cada sessão</span>
+            <span className="text-2xl font-headline font-bold text-on-surface">
+              {actualHours > 0 ? `${actualHours}h` : ''}{actualMins > 0 ? `${actualMins}m` : actualHours === 0 ? '0m' : ''}
+            </span>
+            <span className="text-sm text-outline">
+              / {targetHours > 0 ? `${targetHours}h` : ''}{targetMins > 0 ? `${targetMins}m` : ''}
+            </span>
           </div>
+          <span className={`text-sm font-headline font-bold ${isCompleted ? 'text-secondary' : 'text-primary'}`}>
+            {Math.round(progressPct)}%
+          </span>
         </div>
         
-        <div className="h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+        <div className="h-2 bg-surface-container-highest rounded-full overflow-hidden">
           <div 
-            className="h-full flow-gradient rounded-full transition-all duration-1000" 
-            style={{ width: '0%' }} 
+            className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-gradient-to-r from-secondary to-secondary-fixed-dim' : 'flow-gradient'}`}
+            style={{ width: `${progressPct}%` }} 
           />
         </div>
       </div>

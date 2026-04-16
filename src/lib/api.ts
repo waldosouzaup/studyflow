@@ -95,6 +95,20 @@ export const sessionApi = {
     return data as any[]
   },
 
+  listByDateRange: async (userId: string, from: string, to: string) => {
+    const { data, error } = await supabase
+      .from('study_sessions')
+      .select('date, duration_minutes, subject_id')
+      .eq('user_id', userId)
+      .gte('date', from)
+      .lte('date', to)
+      .not('finished_at', 'is', null)
+      .order('date', { ascending: true })
+
+    if (error) throw error
+    return data as { date: string; duration_minutes: number; subject_id: string }[]
+  },
+
   create: async (session: any) => {
     const { data, error } = await supabase
       .from('study_sessions')

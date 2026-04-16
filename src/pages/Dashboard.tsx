@@ -1,9 +1,11 @@
+import { useMemo } from 'react'
 import { useAuthStore } from '../store/auth'
-import { useSessions } from '../hooks/useSessions'
+import { useSessions, useSessionsByDateRange } from '../hooks/useSessions'
 import { usePlans, useUpdatePlan } from '../hooks/usePlans'
 import { useReviews } from '../hooks/useReviews'
-import { format, subDays, eachDayOfInterval } from 'date-fns'
+import { format, subDays, subWeeks, startOfWeek, eachDayOfInterval } from 'date-fns'
 import { PageLoading } from '../components/Loading'
+import StudyHeatmap from '../components/StudyHeatmap'
 import clsx from 'clsx'
 
 import { useNavigate } from 'react-router-dom'
@@ -20,11 +22,38 @@ export default function Dashboard() {
   const { data: pendingReviews } = useReviews('pending')
   const updatePlan = useUpdatePlan()
 
+  // Heatmap data: last 12 months
+  const heatmapFrom = format(subWeeks(startOfWeek(new Date(), { weekStartsOn: 0 }), 51), 'yyyy-MM-dd')
+  const { data: yearSessions } = useSessionsByDateRange(heatmapFrom, todayStr)
+
   if (isLoading) return <PageLoading />
 
   const todayMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
   const weekMinutes = weekSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
   const todayPlansDone = plans?.filter((p) => p.status === 'done').length || 0
+
+  // ── Streak calculation ──
+  const streak = useMemo(() => {
+    if (!yearSessions || yearSessions.length === 0) return 0
+    const datesWithStudy = new Set<string>()
+    yearSessions.forEach((s) => {
+      if (s.duration_minutes > 0) datesWithStudy.add(s.date.split('T')[0])
+    })
+
+    let count = 0
+    let checkDate = new Date()
+
+    // If no study today, start checking from yesterday
+    if (!datesWithStudy.has(format(checkDate, 'yyyy-MM-dd'))) {
+      checkDate = subDays(checkDate, 1)
+    }
+
+    while (datesWithStudy.has(format(checkDate, 'yyyy-MM-dd'))) {
+      count++
+      checkDate = subDays(checkDate, 1)
+    }
+    return count
+  }, [yearSessions])
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -60,9 +89,24 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+        {/* Streak Card */}
+        <div className="surface-card p-6 relative overflow-hidden group">
+          <div className="absolute -top-4 -right-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity select-none">🔥</div>
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Sequência</span>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-headline font-bold text-on-surface">{streak}</span>
+            <span className="text-sm text-outline">{streak === 1 ? 'dia' : 'dias'}</span>
+          </div>
+          {streak >= 7 && (
+            <span className="inline-block mt-2 text-[9px] font-label uppercase tracking-wider px-2 py-0.5 rounded-md bg-secondary/10 text-secondary">
+              🔥 Em chamas!
+            </span>
+          )}
+        </div>
+
         <div className="surface-card p-6">
-          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Horas Estudadas Hoje</span>
+          <span className="text-[11px] font-label uppercase tracking-wider text-outline">Horas Hoje</span>
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-3xl font-headline font-bold">{Math.floor(todayMinutes / 60)}.{Math.floor((todayMinutes % 60) / 6)}</span>
             <span className="text-sm text-outline">/ 6.0</span>
@@ -95,6 +139,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Heatmap */}
+      <StudyHeatmap sessions={yearSessions} />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <section className="lg:col-span-2 surface-card p-8">

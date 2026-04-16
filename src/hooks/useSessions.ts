@@ -50,3 +50,14 @@ export function useActiveSession() {
     enabled: !!userId,
   })
 }
+
+export function useSessionsByDateRange(from: string, to: string) {
+  const userId = useAuthStore((s) => s.user?.id)
+
+  return useQuery({
+    queryKey: ['sessions-range', userId, from, to],
+    queryFn: () => sessionApi.listByDateRange(userId!, from, to),
+    enabled: !!userId && !!from && !!to,
+    staleTime: 10 * 60 * 1000,
+  })
+}
