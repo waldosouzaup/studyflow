@@ -26,13 +26,7 @@ export default function Dashboard() {
   const heatmapFrom = format(subWeeks(startOfWeek(new Date(), { weekStartsOn: 0 }), 51), 'yyyy-MM-dd')
   const { data: yearSessions } = useSessionsByDateRange(heatmapFrom, todayStr)
 
-  if (isLoading) return <PageLoading />
-
-  const todayMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
-  const weekMinutes = weekSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
-  const todayPlansDone = plans?.filter((p) => p.status === 'done').length || 0
-
-  // ── Streak calculation ──
+  // ── Streak calculation (must be before any early return) ──
   const streak = useMemo(() => {
     if (!yearSessions || yearSessions.length === 0) return 0
     const datesWithStudy = new Set<string>()
@@ -54,6 +48,12 @@ export default function Dashboard() {
     }
     return count
   }, [yearSessions])
+
+  if (isLoading) return <PageLoading />
+
+  const todayMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
+  const weekMinutes = weekSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0
+  const todayPlansDone = plans?.filter((p) => p.status === 'done').length || 0
 
   const getGreeting = () => {
     const hour = new Date().getHours()
