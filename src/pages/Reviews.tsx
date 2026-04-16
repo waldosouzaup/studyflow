@@ -75,7 +75,7 @@ export default function Reviews() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
+          className="w-full md:w-auto justify-center gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
         >
           <span className="material-symbols-outlined">add</span>
           Nova Revisão
@@ -99,7 +99,7 @@ export default function Reviews() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn max-h-[90vh] overflow-y-auto">
             <div className="p-8 border-b border-outline-variant/10">
               <div className="flex justify-between items-start">
                 <div>

@@ -17,7 +17,7 @@ export default function SettingsModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-      <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+      <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn flex flex-col max-h-[90vh]">
         <div className="p-8 border-b border-outline-variant/10">
           <div className="flex justify-between items-start">
             <div>
@@ -43,7 +43,7 @@ export default function SettingsModal({ open, onClose }: Props) {
           ))}
         </div>
 
-        <div className="p-8 space-y-6">
+        <div className="p-8 space-y-6 overflow-y-auto">
           {activeTab === 'appearance' && (
             <>
               <div className="space-y-3">

@@ -87,8 +87,8 @@ export default function Subjects() {
           <span className="text-xs font-label uppercase tracking-widest text-primary mb-2 block">Curadoria</span>
           <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Núcleo de Conhecimento</h1>
         </div>
-        <div className="flex gap-4">
-          <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
+        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high transition-colors">
             <span className="material-symbols-outlined text-on-surface-variant">filter_list</span>
             <span className="font-medium text-on-surface-variant">Filtrar</span>
           </button>
@@ -98,7 +98,7 @@ export default function Subjects() {
               setEditingSubject(null)
               setFormData({ name: '', color: COLORS[0], weeklyGoalHours: '', monthlyGoalHours: '' })
             }}
-            className="gold-accent text-on-secondary px-8 py-3 rounded-lg font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
+            className="flex-1 md:flex-none justify-center gold-accent text-on-secondary px-8 py-3 rounded-lg font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
           >
             <span className="material-symbols-outlined">add</span>
             Novo Assunto
@@ -108,7 +108,7 @@ export default function Subjects() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn">
+          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn max-h-[90vh] overflow-y-auto">
             <div className="p-8 border-b border-outline-variant/10">
               <div className="flex justify-between items-start">
                 <div>
