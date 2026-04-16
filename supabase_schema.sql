@@ -1,4 +1,4 @@
--- StudyFlow Database Schema for Supabase
+-- UP Estudos Database Schema for Supabase
 -- Execute this SQL in your Supabase SQL Editor
 
 -- 1. Users table

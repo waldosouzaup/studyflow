@@ -41,7 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-surface-dim flex">
       <aside className="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-lowest py-8 px-4 font-headline font-medium text-sm">
         <div className="mb-10 px-4">
-          <h1 className="text-xl font-extrabold tracking-widest uppercase text-on-surface">StudyFlow</h1>
+          <h1 className="text-xl font-extrabold tracking-widest uppercase text-on-surface">UP Estudos</h1>
           <p className="text-[10px] uppercase tracking-[0.2em] text-outline mt-1">Santuário Digital</p>
         </div>
         

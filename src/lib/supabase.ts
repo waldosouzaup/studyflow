@@ -11,7 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'x-client-info': 'studyflow/1.0',
+      'x-client-info': 'up-estudos/1.0',
     },
   },
   db: {

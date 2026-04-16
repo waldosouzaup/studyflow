@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 
-interface StudyFlowDB extends DBSchema {
+interface UPEstudosDB extends DBSchema {
   sessions: {
     key: string
     value: {
@@ -34,11 +34,11 @@ interface StudyFlowDB extends DBSchema {
   }
 }
 
-let db: IDBPDatabase<StudyFlowDB> | null = null
+let db: IDBPDatabase<UPEstudosDB> | null = null
 
 export async function initDB() {
   if (db) return db
-  db = await openDB<StudyFlowDB>('studyflow', 2, {
+  db = await openDB<UPEstudosDB>('up_estudos', 2, {
     upgrade(db, oldVersion) {
       // Delete old stores if upgrading from v1 (camelCase schema)
       if (oldVersion < 2) {

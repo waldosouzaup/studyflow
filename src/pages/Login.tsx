@@ -55,10 +55,10 @@ export default function Login() {
       <div className="relative z-10 max-w-md w-full mx-4">
         <div className="text-center mb-10 animate-fadeIn">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl flow-gradient shadow-glow mb-6">
-            <span className="text-3xl font-headline font-bold text-on-primary">SF</span>
+            <span className="text-3xl font-headline font-bold text-on-primary">UP</span>
           </div>
           <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3">
-            StudyFlow
+            UP Estudos
           </h1>
           <p className="text-on-surface-variant text-lg">
             Santuário Digital para o Foco

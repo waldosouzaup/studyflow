@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'StudyFlow',
-        short_name: 'StudyFlow',
+        name: 'UP Estudos',
+        short_name: 'UP Estudos',
         description: 'Sistema de Gestão de Estudos',
         theme_color: '#ffffff',
         icons: [

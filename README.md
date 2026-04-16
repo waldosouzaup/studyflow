@@ -1,8 +1,8 @@
-# StudyFlow - Santuário Digital de Estudos
+# UP Estudos - Santuário Digital de Estudos
 
 <div align="center">
 
-![StudyFlow](https://img.shields.io/badge/StudyFlow-v1.0.0-1A1A1A?style=for-the-badge&logo=vercel)
+![UP Estudos](https://img.shields.io/badge/UP_Estudos-v1.0.0-1A1A1A?style=for-the-badge&logo=vercel)
 
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=flat&logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.0-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org)
@@ -12,7 +12,7 @@
 [![Netlify](https://img.shields.io/badge/Netlify-Host-00AD9F?style=flat&logo=netlify)](https://netlify.com)
 [![PWA](https://img.shields.io/badge/PWA-Ready-1A1A1A?style=flat)](https://web.dev/progressive-web-apps)
 
-**StudyFlow** é uma aplicação web progressiva de gestão de estudos focada em métricas de alto desempenho e design minimalista *luxury*, orientada a dados analíticos e metodologia científica.
+**UP Estudos** é uma aplicação web progressiva de gestão de estudos focada em métricas de alto desempenho e design minimalista *luxury*, orientada a dados analíticos e metodologia científica.
 
 [Acessar Demo](https://fluxodeestudo.netlify.app/) · [Reportar Bug](https://github.com/waldosouzaup/studyflow/issues) · [Contribuir](#contribuição)
 
@@ -34,7 +34,7 @@
 
 ## Sobre o Projeto
 
-StudyFlow é mais do que um Pomodoro: é um *santuário digital* para a construção de alto desempenho intelectual.
+UP Estudos é mais do que um Pomodoro: é um *santuário digital* para a construção de alto desempenho intelectual.
 
 A aplicação adota um visual *luxury minimalista* com contrastes fortes (Modo Dark e Light dinâmicos, detalhes em variações ouro) e uso extenso de bordas retas (zero radius) para um ar de sofisticação e precisão. 
 

@@ -1,4 +1,4 @@
-**StudyFlow**
+**UP Estudos**
 
 Software Design Document
 
@@ -14,11 +14,11 @@ Sistema de Gestão de Estudos — SaaS / PWA
 
 ## **1.1 Propósito do Documento**
 
-Este Software Design Document (SDD) descreve a arquitetura completa, os componentes, interfaces e decisões técnicas do sistema StudyFlow — uma plataforma SaaS de gestão de estudos para usuários individuais. O documento serve como referência para desenvolvimento, onboarding de novos engenheiros e validação de requisitos técnicos.
+Este Software Design Document (SDD) descreve a arquitetura completa, os componentes, interfaces e decisões técnicas do sistema UP Estudos — uma plataforma SaaS de gestão de estudos para usuários individuais. O documento serve como referência para desenvolvimento, onboarding de novos engenheiros e validação de requisitos técnicos.
 
 ## **1.2 Escopo**
 
-O StudyFlow cobre quatro pilares funcionais: Planejamento, Execução (timer em tempo real), Medição (analytics e relatórios) e Revisão (repetição espaçada). A plataforma opera como Progressive Web App (PWA) com suporte offline parcial e sincronização em background.
+O UP Estudos cobre quatro pilares funcionais: Planejamento, Execução (timer em tempo real), Medição (analytics e relatórios) e Revisão (repetição espaçada). A plataforma opera como Progressive Web App (PWA) com suporte offline parcial e sincronização em background.
 
 ## **1.3 Definições e Acrônimos**
 
@@ -41,7 +41,7 @@ O StudyFlow cobre quatro pilares funcionais: Planejamento, Execução (timer em 
 
 ## **1.4 Referências**
 
-* PRD — StudyFlow v1.0 (documento de origem)
+* PRD — UP Estudos v1.0 (documento de origem)
 
 * RFC 7519 — JSON Web Token (JWT)
 
@@ -131,7 +131,7 @@ Estudantes e profissionais em aprendizado contínuo carecem de ferramentas que i
 
 ## **3.1 Visão Arquitetural**
 
-O StudyFlow adota uma arquitetura de três camadas com separação clara entre frontend (SPA/PWA), backend (API REST stateless) e persistência (PostgreSQL \+ Redis). A comunicação entre camadas ocorre exclusivamente via HTTP/JSON com autenticação JWT.
+O UP Estudos adota uma arquitetura de três camadas com separação clara entre frontend (SPA/PWA), backend (API REST stateless) e persistência (PostgreSQL \+ Redis). A comunicação entre camadas ocorre exclusivamente via HTTP/JSON com autenticação JWT.
 
 | Decisão Arquitetural \#1 — Monolito Modular vs. Microsserviços Para o escopo atual (\< 10k usuários), adota-se monolito modular. Módulos são organizados por domínio com interfaces bem definidas, permitindo extração futura para microsserviços sem reescrita completa. Trade-off: menor complexidade operacional, maior acoplamento aceitável na fase inicial. |
 | :---- |
@@ -290,7 +290,7 @@ O serviço de planejamento executa diariamente às 00h05 para marcar tarefas exp
 
 ### **4.5.1 Algoritmo de Repetição Espaçada**
 
-O StudyFlow implementa uma versão simplificada de repetição espaçada com intervalos fixos: 1 dia, 7 dias e 30 dias. O usuário escolhe o intervalo ao finalizar uma sessão. Ao concluir uma revisão, o sistema sugere o próximo intervalo automaticamente.
+O UP Estudos implementa uma versão simplificada de repetição espaçada com intervalos fixos: 1 dia, 7 dias e 30 dias. O usuário escolhe o intervalo ao finalizar uma sessão. Ao concluir uma revisão, o sistema sugere o próximo intervalo automaticamente.
 
 | Intervalo | Uso Recomendado | Próximo Intervalo Sugerido |
 | :---- | :---- | :---- |
@@ -431,7 +431,7 @@ O esquema é centrado no usuário (User) que possui múltiplos Subjects. Session
 
 ## **6.1 Convenções Gerais**
 
-* Base URL: https://api.studyflow.app/v1
+* Base URL: https://api.UP Estudos.app/v1
 
 * Autenticação: Bearer Token JWT no header Authorization
 
@@ -677,7 +677,7 @@ Todas as tabelas possuem policy RLS que restringe SELECT/INSERT/UPDATE/DELETE ao
 | GOOGLE\_CLIENT\_ID | Sim | Client ID do Google OAuth App |
 | GOOGLE\_CLIENT\_SECRET | Sim | Client Secret do Google OAuth App |
 | GOOGLE\_REDIRECT\_URI | Sim | URL de callback cadastrada no Google Console |
-| FRONTEND\_URL | Sim | URL do frontend para CORS (ex: https://app.studyflow.com) |
+| FRONTEND\_URL | Sim | URL do frontend para CORS (ex: https://app.UP Estudos.com) |
 | NODE\_ENV | Sim | development | staging | production |
 | PORT | Não | Porta do servidor (padrão: 3000\) |
 
@@ -689,7 +689,7 @@ Todas as tabelas possuem policy RLS que restringe SELECT/INSERT/UPDATE/DELETE ao
 
 ### **ADR-001: PostgreSQL em vez de MongoDB**
 
-Contexto: Dados do StudyFlow são altamente relacionais (sessões → assuntos → metas). Decisão: PostgreSQL pela garantia ACID em sessões de estudo e suporte nativo a queries de agregação temporal. Trade-off aceito: maior rigidez de schema, compensada por migrations Prisma.
+Contexto: Dados do UP Estudos são altamente relacionais (sessões → assuntos → metas). Decisão: PostgreSQL pela garantia ACID em sessões de estudo e suporte nativo a queries de agregação temporal. Trade-off aceito: maior rigidez de schema, compensada por migrations Prisma.
 
 ### **ADR-002: Fastify em vez de Express**
 
@@ -697,10 +697,10 @@ Contexto: Performance e validação de schema. Decisão: Fastify oferece \~3x ma
 
 ### **ADR-003: Zustand em vez de Redux**
 
-Contexto: Gerenciamento de estado no frontend. Decisão: Zustand tem API mínima (\~1kb), sem boilerplate de actions/reducers, suficiente para o estado local do StudyFlow. TanStack Query cuida do estado de servidor. Trade-off: Redux seria mais adequado para equipes maiores com maior histórico de debugging.
+Contexto: Gerenciamento de estado no frontend. Decisão: Zustand tem API mínima (\~1kb), sem boilerplate de actions/reducers, suficiente para o estado local do UP Estudos. TanStack Query cuida do estado de servidor. Trade-off: Redux seria mais adequado para equipes maiores com maior histórico de debugging.
 
 ### **ADR-004: Monolito Modular em vez de Microsserviços**
 
 Contexto: Escopo inicial com equipe pequena. Decisão: Microsserviços adicionam overhead operacional desproporcionalmente alto para 0–5k usuários. O monolito modular permite extração futura. Trade-off: Acoplamento técnico entre módulos é gerenciado via interfaces de service bem definidas.
 
-StudyFlow SDD v1.0 — Documento de Portfólio Técnico
+UP Estudos SDD v1.0 — Documento de Portfólio Técnico
