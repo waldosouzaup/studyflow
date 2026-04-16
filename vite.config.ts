@@ -7,17 +7,27 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'UP Estudos',
         short_name: 'UP Estudos',
-        description: 'Sistema de Gestão de Estudos',
-        theme_color: '#ffffff',
+        description: 'Sistema de Gestão de Estudos de Alta Performance',
+        theme_color: '#000000',
+        background_color: '#000000',
+        display: 'standalone',
+        orientation: 'portrait',
         icons: [
           {
             src: 'favicon.svg',
             sizes: 'any',
-            type: 'image/svg+xml'
+            type: 'image/svg+xml',
+            purpose: 'any'
+          },
+          {
+            src: 'favicon.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
           }
         ]
       },

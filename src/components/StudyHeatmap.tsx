@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { format, subDays, eachDayOfInterval, getDay, subWeeks, startOfWeek } from 'date-fns'
+import { format, eachDayOfInterval, getDay, subWeeks, startOfWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 interface HeatmapProps {
@@ -25,7 +25,7 @@ const INTENSITY_CLASSES = [
 ]
 
 export default function StudyHeatmap({ sessions }: HeatmapProps) {
-  const { grid, monthLabels, totalDays, totalMinutes, activeDays } = useMemo(() => {
+  const { grid, monthLabels, totalMinutes, activeDays } = useMemo(() => {
     const today = new Date()
     const weeksToShow = 52
     const gridStart = startOfWeek(subWeeks(today, weeksToShow - 1), { weekStartsOn: 0 })
@@ -78,7 +78,6 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
     return {
       grid: weeks,
       monthLabels: labels,
-      totalDays: days.length,
       totalMinutes: totalMin,
       activeDays: active,
     }

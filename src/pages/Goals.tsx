@@ -4,7 +4,7 @@ import { useSubjects } from '../hooks/useSubjects'
 import { useSessionsByDateRange } from '../hooks/useSessions'
 import { useAuthStore } from '../store/auth'
 import { PageLoading, ErrorMessage } from '../components/Loading'
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 import type { Goal } from '../types/database'
 
 export default function Goals() {
