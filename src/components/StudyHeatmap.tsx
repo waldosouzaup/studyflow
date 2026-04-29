@@ -17,11 +17,11 @@ function getIntensity(minutes: number): number {
 }
 
 const INTENSITY_COLORS = [
-  'bg-[var(--bg-subtle)]',
-  'bg-accent/20',
-  'bg-accent/40',
-  'bg-accent/65',
-  'bg-accent',
+  'bg-[var(--bg-base)] border border-[var(--border)]',
+  'bg-accent/20 border border-accent/10',
+  'bg-accent/40 border border-accent/20',
+  'bg-accent/70 border border-accent/30',
+  'bg-accent shadow-[0_0_8px_rgba(16,185,129,0.4)]',
 ]
 
 export default function StudyHeatmap({ sessions }: HeatmapProps) {
@@ -82,27 +82,32 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
   const totalMins = totalMinutes % 60
 
   return (
-    <div className="card p-4 lg:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-        <div>
-          <h3 className="text-base font-display font-bold text-[var(--text-primary)]">Mapa de Atividade</h3>
-          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Últimos 12 meses</p>
+    <div className="card flex flex-col overflow-hidden">
+      <div className="p-5 border-b border-[var(--border)] bg-[var(--bg-elevated)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-card bg-[var(--bg-base)] border border-[var(--border)] flex items-center justify-center shrink-0 shadow-sm">
+            <span className="material-symbols-outlined text-[var(--text-secondary)] text-[20px]">calendar_view_week</span>
+          </div>
+          <div>
+            <h3 className="text-base font-display font-bold text-[var(--text-primary)]">Mapa de Atividade</h3>
+            <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">Últimos 12 meses</p>
+          </div>
         </div>
-        <div className="flex items-center gap-5">
-          <div className="text-right">
-            <span className="text-[10px] text-[var(--text-muted)] block uppercase tracking-wider">Dias ativos</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-[var(--bg-base)] px-3 py-1.5 rounded-card border border-[var(--border)]">
+            <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-label">Dias ativos</span>
             <span className="text-sm font-display font-bold text-[var(--text-primary)]">{activeDays}</span>
           </div>
-          <div className="text-right">
-            <span className="text-[10px] text-[var(--text-muted)] block uppercase tracking-wider">Total</span>
-            <span className="text-sm font-display font-bold text-[var(--text-primary)]">
+          <div className="flex items-center gap-2 bg-[var(--bg-base)] px-3 py-1.5 rounded-card border border-[var(--border)]">
+            <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-label">Total</span>
+            <span className="text-sm font-display font-bold text-accent">
               {totalHours}h {totalMins}m
             </span>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto pb-1">
+      <div className="p-5 overflow-x-auto pb-4">
         <div className="min-w-[720px]">
           {/* Month labels */}
           <div className="flex mb-1.5 pl-7">
@@ -144,7 +149,7 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
                   return (
                     <div
                       key={dayIdx}
-                      className={`w-[11px] h-[11px] rounded-[2px] transition-colors ${INTENSITY_COLORS[intensity]} hover:ring-1 hover:ring-accent/50 cursor-default`}
+                      className={`w-3 h-3 rounded-[3px] transition-all duration-300 ${INTENSITY_COLORS[intensity]} hover:ring-2 hover:ring-accent hover:ring-offset-1 hover:ring-offset-[var(--bg-raised)] hover:scale-125 hover:z-10 relative cursor-default`}
                       title={`${format(cell.date, 'd MMM yyyy', { locale: ptBR })}: ${cell.minutes > 0 ? `${Math.floor(cell.minutes / 60)}h ${cell.minutes % 60}m` : 'Sem estudo'}`}
                     />
                   )
