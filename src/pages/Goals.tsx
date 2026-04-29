@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/auth'
 import { PageLoading, ErrorMessage } from '../components/Loading'
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 import type { Goal } from '../types/database'
+import clsx from 'clsx'
 
 export default function Goals() {
   const userId = useAuthStore((s) => s.user?.id) || ''
@@ -21,7 +22,6 @@ export default function Goals() {
   const createGoal = useCreateGoal()
   const updateGoal = useUpdateGoal()
 
-  // Fetch session data covering all active goal periods
   const today = new Date()
   const monthStart = format(startOfMonth(today), 'yyyy-MM-dd')
   const monthEnd = format(endOfMonth(today), 'yyyy-MM-dd')
@@ -34,27 +34,18 @@ export default function Goals() {
     return { start: format(startOfMonth(now), 'yyyy-MM-dd'), end: format(endOfMonth(now), 'yyyy-MM-dd') }
   }
 
-  // Calculate actual minutes per goal based on sessions
   const goalProgress = useMemo(() => {
     if (!goals || !periodSessions) return new Map<string, number>()
-
     const progressMap = new Map<string, number>()
-
     goals.forEach((goal) => {
       const periodStart = goal.period_start.split('T')[0]
       const periodEnd = goal.period_end.split('T')[0]
-
       const matchingSessions = periodSessions.filter((s) => {
         const sessionDate = s.date.split('T')[0]
-        const inPeriod = sessionDate >= periodStart && sessionDate <= periodEnd
-        const matchesSubject = !goal.subject_id || s.subject_id === goal.subject_id
-        return inPeriod && matchesSubject
+        return sessionDate >= periodStart && sessionDate <= periodEnd && (!goal.subject_id || s.subject_id === goal.subject_id)
       })
-
-      const totalMinutes = matchingSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0)
-      progressMap.set(goal.id, totalMinutes)
+      progressMap.set(goal.id, matchingSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0))
     })
-
     return progressMap
   }, [goals, periodSessions])
 
@@ -63,19 +54,13 @@ export default function Goals() {
     const period = getPeriod(formData.type)
     try {
       await createGoal.mutateAsync({
-        user_id: userId,
-        subject_id: formData.subjectId || null,
-        type: formData.type,
-        target_minutes: formData.targetMinutes,
-        period_start: period.start,
-        period_end: period.end,
-        is_active: true,
+        user_id: userId, subject_id: formData.subjectId || null,
+        type: formData.type, target_minutes: formData.targetMinutes,
+        period_start: period.start, period_end: period.end, is_active: true,
       })
       setShowForm(false)
       setFormData({ subjectId: '', type: 'daily', targetMinutes: 60 })
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   if (isLoading) return <PageLoading />
@@ -86,137 +71,85 @@ export default function Goals() {
   const monthlyGoals = goals?.filter((g) => g.type === 'monthly') || []
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-label uppercase tracking-widest text-secondary mb-2 block">Painel de Análise</span>
-          <h1 className="text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Desempenho de Estudo</h1>
+          <span className="text-[10px] font-label uppercase tracking-[0.12em] text-[var(--text-muted)]">Desempenho</span>
+          <h1 className="text-2xl lg:text-3xl font-display font-bold text-[var(--text-primary)] tracking-tight">Metas</h1>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="w-full md:w-auto justify-center gold-accent text-on-secondary px-6 py-3 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-xl shadow-secondary/20"
-        >
-          <span className="material-symbols-outlined">add</span>
+        <button onClick={() => setShowForm(true)} className="btn-gold px-5 py-2.5 text-sm font-semibold flex items-center gap-2 shrink-0">
+          <span className="material-symbols-outlined text-[18px]">add</span>
           Nova Meta
         </button>
       </div>
 
+      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-          <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn max-h-[90vh] overflow-y-auto">
-            <div className="p-8 border-b border-outline-variant/10">
+          <div className="card w-full max-w-lg overflow-hidden animate-scaleIn">
+            <div className="p-6 border-b border-[var(--border)]">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[10px] font-label uppercase tracking-[0.15em] text-secondary mb-1">Nova Meta</p>
-                  <h2 className="text-2xl font-headline font-bold text-on-surface">Configurar Meta</h2>
+                  <span className="text-[10px] font-label uppercase tracking-[0.12em] text-gold">Nova</span>
+                  <h2 className="text-lg font-display font-bold text-[var(--text-primary)]">Meta</h2>
                 </div>
-                <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors">✕</button>
+                <button onClick={() => setShowForm(false)} className="w-8 h-8 flex items-center justify-center rounded-card text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] transition-colors">✕</button>
               </div>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Ciclo</label>
-                <div className="flex gap-2 bg-surface-container-highest rounded-lg border border-outline-variant/10 p-1">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <div>
+                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-2">Ciclo</label>
+                <div className="grid grid-cols-3 gap-2">
                   {(['daily', 'weekly', 'monthly'] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: t })}
-                      className={`flex-1 py-3 text-[10px] font-label uppercase tracking-wider transition-all rounded-md ${
-                        formData.type === t 
-                          ? 'bg-surface-container-high text-on-surface shadow-sm' 
-                          : 'text-outline hover:text-on-surface'
-                      }`}
-                    >
+                    <button key={t} type="button" onClick={() => setFormData({ ...formData, type: t })}
+                      className={clsx('py-2.5 text-xs font-medium rounded-card border transition-all',
+                        formData.type === t ? 'bg-[var(--gold-muted)] text-gold border-gold/30' : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border)]')}>
                       {t === 'daily' ? 'Diário' : t === 'weekly' ? 'Semanal' : 'Mensal'}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Assunto</label>
-                <select
-                  value={formData.subjectId}
-                  onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                  className="input w-full"
-                >
+              <div>
+                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Assunto</label>
+                <select value={formData.subjectId} onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })} className="input w-full">
                   <option value="">Todos os assuntos</option>
                   {subjects?.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Meta (minutos)</label>
-                <input
-                  type="number"
-                  value={formData.targetMinutes}
-                  onChange={(e) => setFormData({ ...formData, targetMinutes: parseInt(e.target.value) })}
-                  className="input w-full"
-                  min={1}
-                />
+              <div>
+                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Meta (minutos)</label>
+                <input type="number" value={formData.targetMinutes} onChange={(e) => setFormData({ ...formData, targetMinutes: parseInt(e.target.value) })} className="input w-full" min={1} />
               </div>
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-3 bg-surface-container-highest text-on-surface-variant text-sm font-medium rounded-lg hover:bg-surface-container-high transition-colors">Cancelar</button>
-                <button type="submit" className="flex-1 py-3 gold-accent text-on-secondary text-sm font-bold rounded-lg shadow-lg hover:scale-[1.02] transition-all">Salvar</button>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 btn-ghost py-2.5 text-sm">Cancelar</button>
+                <button type="submit" className="flex-1 btn-gold py-2.5 text-sm font-semibold">Salvar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <section className="space-y-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Diário</h3>
-            <div className="flex-1 h-px bg-outline-variant/30" />
-          </div>
-          {dailyGoals.length === 0 ? (
-            <div className="surface-card p-8 text-center">
-              <p className="text-sm text-outline">Nenhuma meta diária definida.</p>
+      {/* Goals Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {[
+          { label: 'Diário', goals: dailyGoals },
+          { label: 'Semanal', goals: weeklyGoals },
+          { label: 'Mensal', goals: monthlyGoals },
+        ].map(({ label, goals: sectionGoals }) => (
+          <section key={label} className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-label uppercase tracking-[0.2em] text-[var(--text-muted)] font-semibold">{label}</span>
+              <div className="flex-1 h-px bg-[var(--border)]" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {dailyGoals.map((goal) => (
+            {sectionGoals.length === 0 ? (
+              <div className="card p-6 text-center text-sm text-[var(--text-muted)]">Nenhuma meta definida.</div>
+            ) : (
+              sectionGoals.map((goal) => (
                 <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Semanal</h3>
-            <div className="flex-1 h-px bg-outline-variant/30" />
-          </div>
-          {weeklyGoals.length === 0 ? (
-            <div className="surface-card p-8 text-center">
-              <p className="text-sm text-outline">Nenhuma meta semanal definida.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {weeklyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-[10px] font-label uppercase tracking-[0.3em] text-outline">Ciclo Mensal</h3>
-            <div className="flex-1 h-px bg-outline-variant/30" />
-          </div>
-          {monthlyGoals.length === 0 ? (
-            <div className="surface-card p-8 text-center">
-              <p className="text-sm text-outline">Nenhuma meta mensal definida.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {monthlyGoals.map((goal) => (
-                <GoalCard key={goal.id} goal={goal} subject={subjects?.find((s) => s.id === goal.subject_id)} updateGoal={updateGoal} actualMinutes={goalProgress.get(goal.id) || 0} />
-              ))}
-            </div>
-          )}
-        </section>
+              ))
+            )}
+          </section>
+        ))}
       </div>
     </div>
   )
@@ -231,59 +164,41 @@ function GoalCard({ goal, subject, updateGoal, actualMinutes }: { goal: Goal; su
   const targetMins = goal.target_minutes % 60
 
   return (
-    <div className="surface-card p-6 group hover:scale-[1.02] transition-all">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-1.5 h-4 rounded-full" style={{ backgroundColor: subject?.color || '#ADC7FF' }} />
-            <h4 className="text-[10px] font-label uppercase tracking-[0.15em] text-on-surface-variant">
-              {subject?.name || 'GLOBAL'}
-            </h4>
-          </div>
-          <span className="text-[9px] font-mono text-outline uppercase tracking-wider">
-            {goal.type === 'daily' ? 'Hoje' : goal.type === 'weekly' ? 'Esta semana' : 'Este mês'}
+    <div className={clsx('card p-5 transition-all', isCompleted && 'border-gold/30')}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-sharp" style={{ backgroundColor: subject?.color || 'var(--accent)' }} />
+          <span className="text-[10px] font-label uppercase tracking-[0.12em] text-[var(--text-secondary)]">
+            {subject?.name || 'GLOBAL'}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {isCompleted && (
-            <span className="text-[9px] font-label uppercase tracking-wider px-2 py-1 rounded-md bg-secondary/10 text-secondary">
-              ✓ Concluída
-            </span>
-          )}
+          {isCompleted && <span className="badge badge-gold text-[8px]">✓ Meta</span>}
           <button
             onClick={() => updateGoal.mutate({ id: goal.id, updates: { is_active: !goal.is_active } })}
-            className={`px-2.5 py-1 text-[9px] font-label uppercase tracking-wider rounded-md transition-all ${
-              goal.is_active 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-surface-container-highest text-outline'
-            }`}
-          >
+            className={clsx('px-2 py-1 text-[9px] font-label uppercase tracking-wider rounded-sharp transition-all',
+              goal.is_active ? 'bg-[var(--accent-muted)] text-accent' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]')}>
             {goal.is_active ? 'Ativo' : 'Pausado'}
           </button>
         </div>
       </div>
-      
-      <div className="space-y-3">
-        <div className="flex items-end justify-between">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-headline font-bold text-on-surface">
-              {actualHours > 0 ? `${actualHours}h` : ''}{actualMins > 0 ? `${actualMins}m` : actualHours === 0 ? '0m' : ''}
-            </span>
-            <span className="text-sm text-outline">
-              / {targetHours > 0 ? `${targetHours}h` : ''}{targetMins > 0 ? `${targetMins}m` : ''}
-            </span>
-          </div>
-          <span className={`text-sm font-headline font-bold ${isCompleted ? 'text-secondary' : 'text-primary'}`}>
-            {Math.round(progressPct)}%
+
+      <div className="flex items-end justify-between mb-2">
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl font-display font-bold text-[var(--text-primary)]">
+            {actualHours > 0 ? `${actualHours}h` : ''}{actualMins > 0 ? `${actualMins}m` : actualHours === 0 ? '0m' : ''}
+          </span>
+          <span className="text-xs text-[var(--text-muted)]">
+            / {targetHours > 0 ? `${targetHours}h` : ''}{targetMins > 0 ? `${targetMins}m` : ''}
           </span>
         </div>
-        
-        <div className="h-2 bg-surface-container-highest rounded-full overflow-hidden">
-          <div 
-            className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-gradient-to-r from-secondary to-secondary-fixed-dim' : 'flow-gradient'}`}
-            style={{ width: `${progressPct}%` }} 
-          />
-        </div>
+        <span className={clsx('text-sm font-display font-bold', isCompleted ? 'text-gold' : 'text-accent')}>
+          {Math.round(progressPct)}%
+        </span>
+      </div>
+
+      <div className="progress-bar">
+        <div className={clsx('progress-bar-fill', isCompleted && 'gold')} style={{ width: `${progressPct}%` }} />
       </div>
     </div>
   )

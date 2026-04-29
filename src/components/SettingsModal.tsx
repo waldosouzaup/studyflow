@@ -17,25 +17,25 @@ export default function SettingsModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-      <div className="bg-surface-container-low w-full max-w-lg rounded-xl border border-outline-variant/10 animate-scaleIn flex flex-col max-h-[90vh]">
-        <div className="p-8 border-b border-outline-variant/10">
+      <div className="card w-full max-w-lg overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b border-[var(--border)]">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-[10px] font-label uppercase tracking-[0.15em] text-primary mb-1">Sistema</p>
-              <h2 className="text-2xl font-headline font-bold text-on-surface">Configurações</h2>
+              <span className="text-[10px] font-label uppercase tracking-[0.12em] text-accent">Sistema</span>
+              <h2 className="text-lg font-display font-bold text-[var(--text-primary)]">Configurações</h2>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors">✕</button>
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-card text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] transition-colors">✕</button>
           </div>
         </div>
 
-        <div className="flex border-b border-outline-variant/10">
+        <div className="flex border-b border-[var(--border)]">
           {(['appearance', 'account'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={clsx(
-                'flex-1 py-3 text-[10px] font-label uppercase tracking-[0.15em] transition-colors',
-                activeTab === tab ? 'text-primary border-b-2 border-primary' : 'text-outline hover:text-on-surface'
+                'flex-1 py-3 text-[10px] font-label uppercase tracking-[0.12em] transition-colors',
+                activeTab === tab ? 'text-accent border-b-2 border-accent' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               )}
             >
               {tab === 'appearance' ? 'Aparência' : 'Conta'}
@@ -43,11 +43,11 @@ export default function SettingsModal({ open, onClose }: Props) {
           ))}
         </div>
 
-        <div className="p-8 space-y-6 overflow-y-auto">
+        <div className="p-6 space-y-5 overflow-y-auto">
           {activeTab === 'appearance' && (
             <>
               <div className="space-y-3">
-                <label className="block text-[10px] font-label uppercase tracking-[0.15em] text-outline">Tema</label>
+                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)]">Tema</label>
                 <div className="grid grid-cols-3 gap-3">
                   {([
                     { value: 'light' as const, icon: 'light_mode', label: 'Claro' },
@@ -58,10 +58,10 @@ export default function SettingsModal({ open, onClose }: Props) {
                       key={opt.value}
                       onClick={() => setTheme(opt.value)}
                       className={clsx(
-                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
+                        'flex flex-col items-center gap-2 p-4 rounded-card border transition-all',
                         theme === opt.value
-                          ? 'border-primary bg-primary/10 text-on-surface'
-                          : 'border-outline-variant/10 bg-surface-container-highest text-outline hover:text-on-surface hover:border-outline-variant/30'
+                          ? 'border-accent bg-[var(--accent-muted)] text-accent'
+                          : 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:border-[var(--text-muted)]'
                       )}
                     >
                       <span className="material-symbols-outlined text-2xl">{opt.icon}</span>
@@ -71,11 +71,11 @@ export default function SettingsModal({ open, onClose }: Props) {
                 </div>
               </div>
 
-              <div className="surface-card p-4 rounded-xl">
+              <div className="card p-4">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-outline">info</span>
-                  <p className="text-xs text-on-surface-variant">
-                    O tema "{theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema'}" está ativo. As mudanças são aplicadas instantaneamente.
+                  <span className="material-symbols-outlined text-[var(--text-muted)] text-[18px]">info</span>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    O tema "{theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema'}" está ativo.
                   </p>
                 </div>
               </div>
@@ -83,45 +83,40 @@ export default function SettingsModal({ open, onClose }: Props) {
           )}
 
           {activeTab === 'account' && (
-            <>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt="" className="w-16 h-16 rounded-full border border-outline-variant/20 object-cover" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary text-2xl font-bold">
-                      {user?.name?.charAt(0) || '?'}
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-headline font-bold text-on-surface">{user?.name || 'Usuário'}</h3>
-                    <p className="text-xs text-outline">{user?.email}</p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-14 h-14 rounded-full border border-[var(--border)] object-cover" />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center text-[var(--text-inverted)] text-xl font-bold">
+                    {user?.name?.charAt(0) || '?'}
                   </div>
-                </div>
-
-                <div className="surface-card p-4 rounded-xl space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-label uppercase tracking-[0.15em] text-outline">Membro desde</span>
-                    <span className="text-xs text-on-surface-variant font-mono">
-                      {user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : '—'}
-                    </span>
-                  </div>
-                  <div className="h-px bg-outline-variant/10" />
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-label uppercase tracking-[0.15em] text-outline">ID</span>
-                    <span className="text-xs text-on-surface-variant font-mono">{user?.id?.slice(0, 12)}...</span>
-                  </div>
+                )}
+                <div>
+                  <h3 className="text-base font-display font-bold text-[var(--text-primary)]">{user?.name || 'Usuário'}</h3>
+                  <p className="text-xs text-[var(--text-muted)]">{user?.email}</p>
                 </div>
               </div>
-            </>
+
+              <div className="card p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)]">Membro desde</span>
+                  <span className="text-xs text-[var(--text-secondary)] font-mono">
+                    {user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : '—'}
+                  </span>
+                </div>
+                <div className="h-px bg-[var(--border)]" />
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)]">ID</span>
+                  <span className="text-xs text-[var(--text-secondary)] font-mono">{user?.id?.slice(0, 12)}...</span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        <div className="p-8 pt-0">
-          <button
-            onClick={onClose}
-            className="w-full py-3 bg-surface-container-highest text-on-surface-variant text-sm font-medium rounded-lg hover:bg-surface-container-high transition-colors"
-          >
+        <div className="p-6 pt-0">
+          <button onClick={onClose} className="w-full btn-ghost py-2.5 text-sm">
             Fechar
           </button>
         </div>

@@ -16,12 +16,12 @@ function getIntensity(minutes: number): number {
   return 4
 }
 
-const INTENSITY_CLASSES = [
-  'bg-surface-container-highest',
-  'bg-primary/20',
-  'bg-primary/40',
-  'bg-primary/65',
-  'bg-primary',
+const INTENSITY_COLORS = [
+  'bg-[var(--bg-subtle)]',
+  'bg-accent/20',
+  'bg-accent/40',
+  'bg-accent/65',
+  'bg-accent',
 ]
 
 export default function StudyHeatmap({ sessions }: HeatmapProps) {
@@ -75,43 +75,41 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
       if (min > 0) active++
     })
 
-    return {
-      grid: weeks,
-      monthLabels: labels,
-      totalMinutes: totalMin,
-      activeDays: active,
-    }
+    return { grid: weeks, monthLabels: labels, totalMinutes: totalMin, activeDays: active }
   }, [sessions])
 
+  const totalHours = Math.floor(totalMinutes / 60)
+  const totalMins = totalMinutes % 60
+
   return (
-    <div className="surface-card p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <div className="card p-4 lg:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div>
-          <h3 className="text-xl font-headline font-bold text-on-surface">Mapa de Atividade</h3>
-          <p className="text-xs text-outline mt-1">Últimos 12 meses de estudo</p>
+          <h3 className="text-base font-display font-bold text-[var(--text-primary)]">Mapa de Atividade</h3>
+          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Últimos 12 meses</p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5">
           <div className="text-right">
-            <span className="text-xs text-outline block">Dias ativos</span>
-            <span className="text-lg font-headline font-bold text-on-surface">{activeDays}</span>
+            <span className="text-[10px] text-[var(--text-muted)] block uppercase tracking-wider">Dias ativos</span>
+            <span className="text-sm font-display font-bold text-[var(--text-primary)]">{activeDays}</span>
           </div>
           <div className="text-right">
-            <span className="text-xs text-outline block">Total</span>
-            <span className="text-lg font-headline font-bold text-on-surface">
-              {Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m
+            <span className="text-[10px] text-[var(--text-muted)] block uppercase tracking-wider">Total</span>
+            <span className="text-sm font-display font-bold text-[var(--text-primary)]">
+              {totalHours}h {totalMins}m
             </span>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto pb-2">
+      <div className="overflow-x-auto pb-1">
         <div className="min-w-[720px]">
           {/* Month labels */}
-          <div className="flex mb-2 pl-8">
+          <div className="flex mb-1.5 pl-7">
             {monthLabels.map((m, i) => (
               <span
                 key={i}
-                className="text-[10px] font-label text-outline uppercase tracking-wider"
+                className="text-[9px] font-label text-[var(--text-muted)] uppercase tracking-wider"
                 style={{
                   position: 'relative',
                   left: `${m.weekIndex * 14}px`,
@@ -125,13 +123,13 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
             ))}
           </div>
 
-          {/* Heatmap grid */}
+          {/* Grid */}
           <div className="flex gap-[2px]">
             {/* Day labels */}
             <div className="flex flex-col gap-[2px] mr-1 justify-start">
               {['', 'Seg', '', 'Qua', '', 'Sex', ''].map((label, i) => (
-                <div key={i} className="h-[12px] flex items-center">
-                  <span className="text-[9px] font-label text-outline w-6 text-right">{label}</span>
+                <div key={i} className="h-[11px] flex items-center">
+                  <span className="text-[8px] font-label text-[var(--text-muted)] w-5 text-right">{label}</span>
                 </div>
               ))}
             </div>
@@ -141,14 +139,12 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
               <div key={weekIdx} className="flex flex-col gap-[2px]">
                 {Array.from({ length: 7 }).map((_, dayIdx) => {
                   const cell = week.find((d) => d.dayOfWeek === dayIdx)
-                  if (!cell) {
-                    return <div key={dayIdx} className="w-[12px] h-[12px]" />
-                  }
+                  if (!cell) return <div key={dayIdx} className="w-[11px] h-[11px]" />
                   const intensity = getIntensity(cell.minutes)
                   return (
                     <div
                       key={dayIdx}
-                      className={`w-[12px] h-[12px] rounded-[2px] transition-colors ${INTENSITY_CLASSES[intensity]} hover:ring-1 hover:ring-primary/50 cursor-default`}
+                      className={`w-[11px] h-[11px] rounded-[2px] transition-colors ${INTENSITY_COLORS[intensity]} hover:ring-1 hover:ring-accent/50 cursor-default`}
                       title={`${format(cell.date, 'd MMM yyyy', { locale: ptBR })}: ${cell.minutes > 0 ? `${Math.floor(cell.minutes / 60)}h ${cell.minutes % 60}m` : 'Sem estudo'}`}
                     />
                   )
@@ -158,12 +154,12 @@ export default function StudyHeatmap({ sessions }: HeatmapProps) {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-end gap-2 mt-3">
-            <span className="text-[9px] font-label text-outline">Menos</span>
-            {INTENSITY_CLASSES.map((cls, i) => (
-              <div key={i} className={`w-[12px] h-[12px] rounded-[2px] ${cls}`} />
+          <div className="flex items-center justify-end gap-1.5 mt-2">
+            <span className="text-[8px] font-label text-[var(--text-muted)]">Menos</span>
+            {INTENSITY_COLORS.map((cls, i) => (
+              <div key={i} className={`w-[11px] h-[11px] rounded-[2px] ${cls}`} />
             ))}
-            <span className="text-[9px] font-label text-outline">Mais</span>
+            <span className="text-[8px] font-label text-[var(--text-muted)]">Mais</span>
           </div>
         </div>
       </div>

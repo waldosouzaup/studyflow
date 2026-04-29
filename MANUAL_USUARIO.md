@@ -6,8 +6,8 @@ Bem-vindo ao **UP Estudos**, sua central de alta performance para organização 
 
 ## 🚀 1. Primeiros Passos e Acesso
 O sistema utiliza autenticação segura via Google para facilitar seu acesso.
-1. Acesse a página de **Login**.
-2. Clique em **"Entrar com Google"**.
+1. Acesse o sistema através do link: **[upestudos.netlify.app](https://upestudos.netlify.app)**
+2. Na página de **Login**, clique em **"Entrar com Google"**.
 3. Uma vez autenticado, você será direcionado ao seu **Dashboard (Painel)**, onde verá o resumo do seu dia e sua sequência de estudos (Streak 🔥).
 
 ---

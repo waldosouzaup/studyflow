@@ -22,14 +22,16 @@ export const useThemeStore = create<ThemeState>()(
 )
 
 function applyThemeToDOM(theme: Theme) {
-  const isDark =
-    theme === 'dark' ||
-    (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const isLight =
+    theme === 'light' ||
+    (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches)
 
-  if (isDark) {
-    document.documentElement.classList.add('dark')
-  } else {
+  if (isLight) {
+    document.documentElement.classList.add('light')
     document.documentElement.classList.remove('dark')
+  } else {
+    document.documentElement.classList.add('dark')
+    document.documentElement.classList.remove('light')
   }
 }
 

@@ -18,21 +18,14 @@ export default function Login() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         navigate('/')
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: {
-              name,
-            },
-          },
+          options: { data: { name } },
         })
         if (error) throw error
         alert('Conta criada! Verifique seu email para confirmar.')
@@ -46,46 +39,60 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-surface-lowest">
-      <div className="absolute inset-0 bg-gradient-to-br from-surface-dim via-surface to-surface-dim" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[100px]" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-[120px]" />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-base">
+      {/* Background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-accent/[0.03] rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-gold/[0.03] rounded-full blur-[80px]" />
+      </div>
 
-      <div className="relative z-10 max-w-md w-full mx-4">
-        <div className="text-center mb-10 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl flow-gradient shadow-glow mb-6">
-            <span className="text-3xl font-headline font-bold text-on-primary">UP</span>
+      {/* Grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `linear-gradient(var(--text-muted) 1px, transparent 1px), linear-gradient(90deg, var(--text-muted) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+        }}
+      />
+
+      <div className="relative z-10 w-full max-w-md mx-4">
+        {/* Logo */}
+        <div className="text-center mb-8 animate-fadeIn">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-card bg-accent shadow-accent mb-5">
+            <span className="text-xl font-display font-bold text-[var(--text-inverted)]">UP</span>
           </div>
-          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3">
+          <h1 className="text-3xl font-display font-bold text-[var(--text-primary)] tracking-tight mb-2">
             UP Estudos
           </h1>
-          <p className="text-on-surface-variant text-lg">
-            Santuário Digital para o Foco
+          <p className="text-sm text-[var(--text-secondary)]">
+            Foco em resultados. Domine suas certificações.
           </p>
         </div>
 
-        <div className="relative bg-surface-container-low/80 backdrop-blur-xl rounded-2xl shadow-elevated border border-outline-variant/10 p-8 animate-slideUp">
-          <div className="space-y-3 mb-8">
+        {/* Card */}
+        <div className="card p-6 lg:p-8 animate-slideUp">
+          {/* Features */}
+          <div className="space-y-2 mb-6">
             {[
-              { icon: 'timer', color: 'from-primary to-primary-container', text: 'Timer Pomodoro Inteligente' },
-              { icon: 'edit_note', color: 'from-secondary to-secondary-container', text: 'Planejamento Diário Detalhado' },
-              { icon: 'sync', color: 'from-emerald-500 to-green-500', text: 'Revisão Espaçada Integrada' },
-              { icon: 'wifi_off', color: 'from-slate-500 to-slate-600', text: 'Modo Offline Disponível' },
+              { icon: 'target', text: 'Trilhas de certificação' },
+              { icon: 'timer', text: 'Sessões com foco total' },
+              { icon: 'replay', text: 'Revisão espaçada inteligente' },
+              { icon: 'trending_up', text: 'Progresso em tempo real' },
             ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-surface-container-low/50 hover:bg-surface-container-high transition-all duration-300 group cursor-default">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
-                  <span className="material-symbols-outlined text-lg">{feature.icon}</span>
+              <div key={i} className="flex items-center gap-3 p-2.5 rounded-sharp hover:bg-[var(--bg-subtle)] transition-colors">
+                <div className="w-8 h-8 rounded-sharp bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-accent text-[16px]">{feature.icon}</span>
                 </div>
-                <span className="text-on-surface font-medium">{feature.text}</span>
+                <span className="text-sm text-[var(--text-primary)]">{feature.text}</span>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-3">
             {!isLogin && (
-              <div className="space-y-2">
-                <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Nome</label>
+              <div>
+                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Nome</label>
                 <input
                   type="text"
                   value={name}
@@ -97,8 +104,8 @@ export default function Login() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Email</label>
+            <div>
+              <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Email</label>
               <input
                 type="email"
                 value={email}
@@ -109,8 +116,8 @@ export default function Login() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-xs font-label uppercase tracking-[0.15em] text-outline">Senha</label>
+            <div>
+              <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Senha</label>
               <input
                 type="password"
                 value={password}
@@ -123,7 +130,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="p-3 bg-error/10 text-error text-sm rounded-lg">
+              <div className="p-3 bg-[var(--danger-muted)] text-danger text-sm rounded-sharp">
                 {error}
               </div>
             )}
@@ -131,16 +138,16 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full flow-gradient text-on-primary py-4 px-6 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden group"
+              className="relative w-full btn-accent py-3.5 text-sm font-bold overflow-hidden group mt-2"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               {loading ? (
-                <span className="flex items-center justify-center gap-3">
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <span>Processando...</span>
+                  Processando...
                 </span>
               ) : (
                 <span>{isLogin ? 'Entrar' : 'Criar Conta'}</span>
@@ -148,25 +155,23 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <button
               onClick={() => { setIsLogin(!isLogin); setError('') }}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-accent hover:underline"
             >
               {isLogin ? 'Não tem conta? Criar' : 'Já tem conta? Entrar'}
             </button>
           </div>
 
-          <p className="text-xs text-outline text-center mt-6">
+          <p className="text-[10px] text-[var(--text-muted)] text-center mt-5">
             Ao entrar, você concorda com nossos{' '}
-            <a href="#" className="text-primary hover:underline">Termos de Uso</a>
+            <a href="#" className="text-accent hover:underline">Termos de Uso</a>
           </p>
         </div>
 
-        <div className="text-center mt-8 animate-fadeIn">
-          <p className="text-outline text-sm">
-            Transforme sua rotina de estudos
-          </p>
+        <div className="text-center mt-6 animate-fadeIn">
+          <p className="text-[var(--text-muted)] text-xs">Domine. Evolua. Conquiste.</p>
         </div>
       </div>
     </div>
