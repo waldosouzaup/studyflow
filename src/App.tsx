@@ -15,6 +15,7 @@ import Plans from './pages/Plans'
 import Reviews from './pages/Reviews'
 import Timer from './pages/Timer'
 import Goals from './pages/Goals'
+import Manual from './pages/Manual'
 import Reset from './pages/Reset'
 import './index.css'
 
@@ -174,6 +175,7 @@ function App() {
                         <Route path="/reviews" element={<Reviews />} />
                         <Route path="/timer" element={<Timer />} />
                         <Route path="/goals" element={<Goals />} />
+                        <Route path="/manual" element={<Manual />} />
                       </Routes>
                     </Layout>
                   </ToastProvider>

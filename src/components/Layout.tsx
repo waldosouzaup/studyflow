@@ -13,6 +13,7 @@ const navItems = [
   { path: '/plans', label: 'Plano', icon: 'event_note', mobileLabel: 'Plano' },
   { path: '/reviews', label: 'Revisões', icon: 'replay', mobileLabel: 'Revisões' },
   { path: '/goals', label: 'Metas', icon: 'trending_up', mobileLabel: 'Metas' },
+  { path: '/manual', label: 'Manual', icon: 'help', mobileLabel: 'Ajuda' },
 ]
 
 const mobileNavItems = navItems.slice(0, 4)
