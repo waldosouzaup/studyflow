@@ -15,16 +15,16 @@ export default function Subjects() {
 
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({ name: '', color: COLORS[0], description: '' })
+  const [formData, setFormData] = useState({ name: '', color: COLORS[0] })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name.trim()) return
     try {
       if (editId) {
-        await updateSubject.mutateAsync({ id: editId, updates: { name: formData.name, color: formData.color, description: formData.description || null } })
+        await updateSubject.mutateAsync({ id: editId, updates: { name: formData.name, color: formData.color } })
       } else {
-        await createSubject.mutateAsync({ user_id: userId, name: formData.name, color: formData.color, description: formData.description || null })
+        await createSubject.mutateAsync({ user_id: userId, name: formData.name, color: formData.color })
       }
       resetForm()
     } catch { console.error('Erro ao salvar assunto') }
@@ -32,7 +32,7 @@ export default function Subjects() {
 
   const handleEdit = (s: any) => {
     setEditId(s.id)
-    setFormData({ name: s.name, color: s.color, description: s.description || '' })
+    setFormData({ name: s.name, color: s.color })
     setShowForm(true)
   }
 
@@ -42,7 +42,7 @@ export default function Subjects() {
   }
 
   const resetForm = () => {
-    setShowForm(false); setEditId(null); setFormData({ name: '', color: COLORS[0], description: '' })
+    setShowForm(false); setEditId(null); setFormData({ name: '', color: COLORS[0] })
   }
 
   if (isLoading) return <PageLoading />
@@ -89,10 +89,6 @@ export default function Subjects() {
                   ))}
                 </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-label uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Descrição</label>
-                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input w-full resize-none" rows={2} placeholder="Opcional" />
-              </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={resetForm} className="flex-1 btn-ghost py-2.5 text-sm">Cancelar</button>
                 <button type="submit" className="flex-1 btn-accent py-2.5 text-sm font-semibold">{editId ? 'Salvar' : 'Criar'}</button>
@@ -110,7 +106,6 @@ export default function Subjects() {
               <div className="w-2 h-10 rounded-sharp shrink-0" style={{ backgroundColor: s.color }} />
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors truncate">{s.name}</h3>
-                {s.description && <p className="text-[11px] text-[var(--text-muted)] mt-0.5 line-clamp-2">{s.description}</p>}
               </div>
             </div>
             <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

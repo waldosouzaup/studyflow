@@ -170,14 +170,19 @@ export const sessionApi = {
 }
 
 export const planApi = {
-  list: async (userId: string, date?: string) => {
+  list: async (userId: string, from?: string, to?: string) => {
     let query = supabase
       .from('plans')
       .select('id, user_id, subject_id, planned_date, task, estimated_minutes, priority, status, is_overdue, created_at, subject:subjects(name, color)')
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
 
-    if (date) query = query.eq('planned_date', date)
+    if (from && to && from === to) {
+      query = query.eq('planned_date', from)
+    } else {
+      if (from) query = query.gte('planned_date', from)
+      if (to) query = query.lte('planned_date', to)
+    }
 
     const { data, error } = await query
     if (error) throw error

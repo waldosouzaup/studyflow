@@ -31,7 +31,7 @@ export default function Plans() {
       await createPlan.mutateAsync({
         user_id: userId, task: formData.task, subject_id: formData.subjectId || null,
         priority: formData.priority, estimated_minutes: formData.estimatedMinutes, status: 'pending',
-        date: formData.date,
+        planned_date: formData.date,
       })
       setShowForm(false)
       setFormData({ task: '', subjectId: '', priority: 'medium', estimatedMinutes: 30, date: today })
@@ -49,7 +49,7 @@ export default function Plans() {
   const plansByDate: Record<string, typeof plans> = {}
   if (view === 'week' && plans) {
     plans.forEach(p => {
-      const dateKey = p.date?.split('T')[0] || today
+      const dateKey = p.planned_date?.split('T')[0] || today
       if (!plansByDate[dateKey]) plansByDate[dateKey] = []
       plansByDate[dateKey]!.push(p)
     })
